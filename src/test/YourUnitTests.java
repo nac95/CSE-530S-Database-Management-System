@@ -75,4 +75,72 @@ public class YourUnitTests {
 		assertTrue(tup.getPid()== 0);
 		assertTrue(tup1.getPid() == 1);
 	}
+	private static final String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
+	
+
+	private Type[] randomTypes(int n) {
+		Type[] t = new Type[n];
+		for(int i = 0; i < n; i++) {
+			if(Math.random() > .5) {
+				t[i] = Type.INT;
+			}
+			else {
+				t[i] = Type.STRING;
+			}
+		}
+		
+		return t;
+	}
+	
+	private String[] randomColumns(int n) {
+		String[] c = new String[n];
+		for(int i = 0; i < n; i++) {
+			int l = (int)(Math.random() * 12 + 2);
+			String s = "";
+			for (int j = 0; j < l; j++) {
+				s += alphabet.charAt((int)(Math.random() * 36));
+			}
+			c[i] = s;
+		}
+		return c;
+	}
+	@Test
+	public void testGetFieldName() {
+		for(int i = 0; i < 10; i++) {
+			int size = (int)(Math.random() * 15 + 1);
+			Type[] t = randomTypes(size);
+			String[] c = randomColumns(size);
+			TupleDesc td = new TupleDesc(t, c);
+			for(int j = 0; j < size; j++) {
+				assertTrue(td.getFieldName(j) == c[j]);
+			}
+		}
+		
+		try {
+			int size = (int)(Math.random() * 15 + 1);
+			Type[] t = randomTypes(size);
+			String[] c = randomColumns(size);
+			TupleDesc td = new TupleDesc(t, c);
+//			index is larger than the size
+			int i = (int)(Math.random() * (Integer.MAX_VALUE - size)) + size;
+			td.getFieldName(i);
+			fail("index is not a valid field reference");
+		} catch(NoSuchElementException e) {
+			
+		}
+		
+	}
+	
+	@Test
+	public void testGetDesc() {
+		Type[] t = new Type[] {Type.INT, Type.STRING};
+		String[] c = new String[] {"a", "bs"};
+		
+		TupleDesc td = new TupleDesc(t, c);
+		
+		Tuple tup = new Tuple(td);
+		tup.setDesc(td);
+		assertTrue(tup.getDesc() == td);
+
+	}
 }
