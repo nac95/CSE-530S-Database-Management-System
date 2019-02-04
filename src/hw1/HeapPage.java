@@ -46,7 +46,7 @@ public class HeapPage {
 
 	public int getId() {
 		//your code here
-		return 0;
+		return id;
 	}
 
 	/**
@@ -56,7 +56,8 @@ public class HeapPage {
 	 */
 	public int getNumSlots() {
 		//your code here
-		return 0;
+		int result = (HeapFile.PAGE_SIZE * 8) / (td.getSize() * 8 + 1);
+		return result;
 	}
 
 	/**
@@ -65,7 +66,13 @@ public class HeapPage {
 	 */
 	private int getHeaderSize() {        
 		//your code here
-		return 0;
+		int result;
+		if (numSlots % 8 == 0) {
+			result = numSlots / 8;
+		} else {
+			result = numSlots / 8 + 1;
+		}
+		return result;
 	}
 
 	/**
@@ -75,6 +82,17 @@ public class HeapPage {
 	 */
 	public boolean slotOccupied(int s) {
 		//your code here
+		int loc = s / 8;
+		int loc2 = s % 8;
+		if (loc2 == 0) {
+			if ((header[loc - 1] & 1) != 0) {
+				return true;
+			}
+		} else {
+			if ((header[loc] & (1 << (8 - loc2))) != 0) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -85,6 +103,21 @@ public class HeapPage {
 	 */
 	public void setSlotOccupied(int s, boolean value) {
 		//your code here
+		int loc = s / 8;
+		int loc2 = s % 8;
+		if (value) {
+			if (loc2 == 0) {
+				header[loc - 1] = (byte)(header[loc - 1] | 1);
+			} else {
+				header[loc] = (byte)(header[loc] | (1 << (8 - loc2)));
+			}
+		} else {
+			if (loc2 == 0) {
+				header[loc - 1] = (byte)(header[loc - 1] ^ 1);
+			} else {
+				header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2)));
+			}
+		}
 	}
 	
 	/**
@@ -95,6 +128,16 @@ public class HeapPage {
 	 */
 	public void addTuple(Tuple t) throws Exception {
 		//your code here
+		LOOP: for (int j = 0; j <= getHeaderSize(); j++) {
+			for (int i = 0; i < 8; i++) {
+				if (!slotOccupied(j * 8 + i)) {
+					t.setPid(id);
+					t.setId(j * 8 + i);
+					setSlotOccupied(j * 8 + i, true);
+					break LOOP;
+				}
+			}
+		}
 	}
 
 	/**
@@ -104,7 +147,10 @@ public class HeapPage {
 	 * @throws Exception
 	 */
 	public void deleteTuple(Tuple t) {
-		//your code here
+		//your code 
+		if (slotOccupied(t.getId())) {
+			setSlotOccupied(t.getId(), false);
+		}
 	}
 	
 	/**
@@ -233,5 +279,15 @@ public class HeapPage {
 	public Iterator<Tuple> iterator() {
 		//your code here
 		return null;
+	}
+	public boolean hasNext() {
+		for (int j = 0; j <= getHeaderSize(); j++) {
+			for (int i = 0; i < 8; i++) {
+				if (slotOccupied(j * 8 + i)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
