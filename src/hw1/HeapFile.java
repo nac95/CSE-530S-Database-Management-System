@@ -17,7 +17,6 @@ import java.util.Iterator;
 public class HeapFile {
 	
 	public static final int PAGE_SIZE = 4096;
-	public static final int PAGE_SIZE = 4096;
 	private File f;
 	private TupleDesc type;
 	/**
