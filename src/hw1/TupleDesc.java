@@ -94,6 +94,14 @@ public class TupleDesc {
     	return result;
     }
 
+    /**
+    -     * Compares the specified object with this TupleDesc for equality.
+    -     * Two TupleDescs are considered equal if they are the same size and if the
+    -     * n-th type in this TupleDesc is equal to the n-th type in td.
+    -     *
+    -     * @param o the Object to be compared for equality with this TupleDesc.
+    -     * @return true if the object is equal to this TupleDesc.
+    -     */
     @Override
 	public boolean equals(Object obj) {
 		if (this == obj)

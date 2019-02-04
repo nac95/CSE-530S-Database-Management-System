@@ -2,6 +2,8 @@ package hw1;
 
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 	
 /**
  * This class represents a tuple that will contain a single row's worth of information
@@ -13,6 +15,7 @@ public class Tuple {
 	private int pid;
 	private int id;
 	private TupleDesc t;
+	private List<Field> fields = new LinkedList<Field>();
 	
 	/**
 	 * Creates a new tuple with the given description
@@ -63,12 +66,12 @@ public class Tuple {
 	 */
 	public void setField(int i, Field v) {
 		//your code here
-		
+		this.fields.add(i, v);
 	}
 	
 	public Field getField(int i) {
 		//your code here
-		return null;
+		return this.fields.get(i);
 	}
 	
 	/**
