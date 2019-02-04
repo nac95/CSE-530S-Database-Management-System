@@ -34,6 +34,30 @@ public class TupleTest {
 		assertTrue(tup.getField(1).equals(new StringField(f2)));
 
 	}
-
-
+	@Test
+	public void testIDAccess() {
+		Type[] t = new Type[] {Type.INT, Type.STRING};
+		String[] c = new String[] {"a", "bs"};
+		TupleDesc td = new TupleDesc(t, c);
+		TupleDesc td1 = new TupleDesc(t, c);
+		Tuple tup = new Tuple(td);
+		Tuple tup1 = new Tuple(td1);
+		tup.setId(0);
+		tup1.setId(1);
+		assertTrue(tup.getId()== 0);
+		assertTrue(tup1.getId() == 1);
+	}
+	@Test
+	public void testPidAccess() {
+		Type[] t = new Type[] {Type.INT, Type.STRING};
+		String[] c = new String[] {"a", "bs"};
+		TupleDesc td = new TupleDesc(t, c);
+		TupleDesc td1 = new TupleDesc(t, c);
+		Tuple tup = new Tuple(td);
+		Tuple tup1 = new Tuple(td1);
+		tup.setPid(0);
+		tup1.setPid(1);
+		assertTrue(tup.getPid()== 0);
+		assertTrue(tup1.getPid() == 1);
+	}
 }
