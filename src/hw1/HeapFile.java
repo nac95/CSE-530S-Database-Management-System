@@ -17,7 +17,9 @@ import java.util.Iterator;
 public class HeapFile {
 	
 	public static final int PAGE_SIZE = 4096;
-	
+	public static final int PAGE_SIZE = 4096;
+	private File f;
+	private TupleDesc type;
 	/**
 	 * Creates a new heap file in the given location that can accept tuples of the given type
 	 * @param f location of the heap file
@@ -25,16 +27,18 @@ public class HeapFile {
 	 */
 	public HeapFile(File f, TupleDesc type) {
 		//your code here
+		this.f = f;
+		this.type = type;
 	}
 	
 	public File getFile() {
 		//your code here
-		return null;
+		return f;
 	}
 	
 	public TupleDesc getTupleDesc() {
 		//your code here
-		return null;
+		return type;
 	}
 	
 	/**
@@ -46,6 +50,17 @@ public class HeapFile {
 	 */
 	public HeapPage readPage(int id) {
 		//your code here
+		try {
+			RandomAccessFile file = new RandomAccessFile(getFile(), "r");
+			file.seek(id * getTupleDesc().getSize());
+			byte[] data = new byte[getTupleDesc().getSize()];
+			file.read(data);
+			file.close();
+			HeapPage page = new HeapPage(id, data, getId());
+			return page;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -56,7 +71,7 @@ public class HeapFile {
 	 */
 	public int getId() {
 		//your code here
-		return -1;
+		return f.hashCode();
 	}
 	
 	/**
@@ -66,6 +81,15 @@ public class HeapFile {
 	 */
 	public void writePage(HeapPage p) {
 		//your code here
+		try {
+			RandomAccessFile file;
+			file = new RandomAccessFile(getFile(), "rw");
+			file.seek(p.getId() * getTupleDesc().getSize());
+			file.write(p.getPageData());
+			file.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -77,6 +101,27 @@ public class HeapFile {
 	 */
 	public HeapPage addTuple(Tuple t) {
 		//your code here
+		int id = 0;
+		try {
+			while (id <= getNumPages()) {
+				HeapPage p = readPage(id);
+				for (int s = 0; s <= p.getNumSlots(); s++) {
+					if (!p.slotOccupied(s)) {
+						p.addTuple(t);
+						writePage(p);
+						return p;
+					}
+				}
+			}
+			HeapPage page;
+			page = new HeapPage(getNumPages() + 1, null, getId());
+			page.addTuple(t);
+			writePage(page);
+			return page;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -87,6 +132,15 @@ public class HeapFile {
 	 */
 	public void deleteTuple(Tuple t){
 		//your code here
+		try {
+			int pId = t.getPid();
+			HeapPage p = readPage(pId);
+			p.deleteTuple(t);
+			writePage(p);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -105,6 +159,8 @@ public class HeapFile {
 	 */
 	public int getNumPages() {
 		//your code here
-		return 0;
+		int numPages = 0;
+		numPages = (int)(getFile().length() / HeapFile.PAGE_SIZE);
+		return numPages;
 	}
 }
