@@ -86,7 +86,8 @@ public class HeapPage {
 		//your code here
 		int loc = s / 8;
 		int loc2 = s % 8;
-		if ((header[loc] & (1 << (8 - loc2))) != 0) {
+		int bit = (header[loc] >> loc2) & 1;
+		if (bit != 0) {
 			return true;
 		}
 		return false;
@@ -102,9 +103,9 @@ public class HeapPage {
 		int loc = s / 8;
 		int loc2 = s % 8;
 		if (value) {
-			header[loc] = (byte)(header[loc] | (1 << (8 - loc2)));
+			header[loc] = (byte)(header[loc] | (1 << (8 - loc2 - 1)));
 		} else {
-			header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2)));
+			header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2 - 1)));
 		}
 	}
 	

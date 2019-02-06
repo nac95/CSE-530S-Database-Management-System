@@ -83,12 +83,12 @@ public class TupleDesc {
     public int getSize() {
     	//your code here
     	int result = 0;
-    	for(int i = 0; i < this.types.length; ++i) {
+    	for(int i = 0; i < this.types.length; i++) {
     		if(this.types[i]==Type.INT) {
     			result = result + 4;
     		}
     		else if(this.types[i]==Type.STRING) {
-    			result = result + 128;
+    			result = result + 128 + 1;
     		}
     	}
     	return result;
