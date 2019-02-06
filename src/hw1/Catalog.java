@@ -15,13 +15,27 @@ import java.util.*;
  */
 
 public class Catalog {
+	HashMap<String, Table> tableName = new HashMap<String, Table>();
+	HashMap<Integer, Table> tableId = new HashMap<Integer, Table>();
 	
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
+	public class Table{
+		private HeapFile file;
+		private String name;
+		private String pkeyField;
+		public Table(HeapFile file, String name, String pkeyField) {
+			this.file = file;
+			this.name = name;
+			this.pkeyField = pkeyField;
+		}
+	}
+	
     public Catalog() {
     	//your code here
+    	
     }
 
     /**
@@ -34,6 +48,10 @@ public class Catalog {
      */
     public void addTable(HeapFile file, String name, String pkeyField) {
     	//your code here
+    	Table table = new Table(file, name, pkeyField);
+    	tableName.put(name, table);
+    	int id = table.file.getId();
+    	tableId.put(id, table);
     }
 
     public void addTable(HeapFile file, String name) {
@@ -46,7 +64,13 @@ public class Catalog {
      */
     public int getTableId(String name) {
     	//your code here
-    	return 0;
+    	try {
+    		Table table = tableName.get(name);
+        	return table.file.getId();
+    	} catch(NoSuchElementException e) {
+    		throw e;
+    	}
+    	
     }
 
     /**
@@ -56,7 +80,8 @@ public class Catalog {
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
     	//your code here
-    	return null;
+    	Table table = tableId.get(tableid);
+    	return table.file.getTupleDesc();
     }
 
     /**
@@ -67,27 +92,32 @@ public class Catalog {
      */
     public HeapFile getDbFile(int tableid) throws NoSuchElementException {
     	//your code here
-    	return null;
+    	Table table = tableId.get(tableid);
+    	return table.file;
     }
 
     /** Delete all tables from the catalog */
     public void clear() {
     	//your code here
+    	tableName.clear();
+    	tableId.clear();
     }
 
     public String getPrimaryKey(int tableid) {
     	//your code here
-    	return null;
+    	Table table = tableId.get(tableid);
+    	return table.pkeyField;
     }
 
     public Iterator<Integer> tableIdIterator() {
     	//your code here
-    	return null;
+    	return tableId.keySet().iterator();
     }
 
     public String getTableName(int id) {
     	//your code here
-    	return null;
+    	Table table = tableId.get(id);
+    	return table.name;
     }
     
     /**

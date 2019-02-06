@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -17,6 +18,7 @@ public class HeapPage {
 	private TupleDesc td;
 	private int numSlots;
 	private int tableId;
+	HashMap<Tuple, Integer> tupleInPage = new HashMap<Tuple, Integer>();
 
 
 
@@ -84,14 +86,8 @@ public class HeapPage {
 		//your code here
 		int loc = s / 8;
 		int loc2 = s % 8;
-		if (loc2 == 0) {
-			if ((header[loc - 1] & 1) != 0) {
-				return true;
-			}
-		} else {
-			if ((header[loc] & (1 << (8 - loc2))) != 0) {
-				return true;
-			}
+		if ((header[loc] & (1 << (8 - loc2))) != 0) {
+			return true;
 		}
 		return false;
 	}
@@ -106,17 +102,9 @@ public class HeapPage {
 		int loc = s / 8;
 		int loc2 = s % 8;
 		if (value) {
-			if (loc2 == 0) {
-				header[loc - 1] = (byte)(header[loc - 1] | 1);
-			} else {
-				header[loc] = (byte)(header[loc] | (1 << (8 - loc2)));
-			}
+			header[loc] = (byte)(header[loc] | (1 << (8 - loc2)));
 		} else {
-			if (loc2 == 0) {
-				header[loc - 1] = (byte)(header[loc - 1] ^ 1);
-			} else {
-				header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2)));
-			}
+			header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2)));
 		}
 	}
 	
@@ -134,6 +122,7 @@ public class HeapPage {
 					t.setPid(id);
 					t.setId(j * 8 + i);
 					setSlotOccupied(j * 8 + i, true);
+					tupleInPage.put(t, id);
 					break LOOP;
 				}
 			}
@@ -278,16 +267,6 @@ public class HeapPage {
 	 */
 	public Iterator<Tuple> iterator() {
 		//your code here
-		return null;
-	}
-	public boolean hasNext() {
-		for (int j = 0; j <= getHeaderSize(); j++) {
-			for (int i = 0; i < 8; i++) {
-				if (slotOccupied(j * 8 + i)) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return tupleInPage.keySet().iterator();
 	}
 }

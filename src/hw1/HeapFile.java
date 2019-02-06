@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A heap file stores a collection of tuples. It is also responsible for managing pages.
@@ -149,7 +150,14 @@ public class HeapFile {
 	 */
 	public ArrayList<Tuple> getAllTuples() {
 		//your code here
-		return null;
+		ArrayList<Tuple> allTuple = new ArrayList<Tuple>();
+		for (int i = 0; i < getNumPages(); i++) {
+			Iterator<Tuple> iter = readPage(i).iterator();
+			while (iter.hasNext()) {
+				allTuple.add(iter.next());
+			}
+		}
+		return allTuple;
 	}
 	
 	/**
