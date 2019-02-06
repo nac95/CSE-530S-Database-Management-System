@@ -123,6 +123,7 @@ public class HeapPage {
 				t.setId(i);
 				setSlotOccupied(i, true);
 				tuples[i] = t;
+				break;
 			}
 		}
 	}
