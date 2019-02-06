@@ -101,28 +101,25 @@ public class HeapFile {
 	 */
 	public HeapPage addTuple(Tuple t) {
 		//your code here
-		int id = 0;
+		boolean addSuccess = false;
 		try {
-			HeapPage p =null;
-			while (id <= getNumPages()) {
-				p = readPage(id);
-				int s;
-				for (s = 0; s < p.getNumSlots(); s++) {
+			HeapPage p = null;
+			for (int i = 0; i < getNumPages(); i++) {
+				p = readPage(i);
+				for (int s = 0; s < p.getNumSlots(); s++) {
 					if (!p.slotOccupied(s)) {
+						addSuccess = true;
 						p.addTuple(t);
 						writePage(p);
 						return p;
 					}
 				}
-				if (s == p.getNumSlots()) {
-					id++;
-					HeapPage page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], id);
-				}
 			}
-//			HeapPage page;
-//			page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], id);
-//			page.addTuple(t);
-//			writePage(page);
+			if (!addSuccess) {
+				p = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], getId());
+				p.addTuple(t);
+				writePage(p);
+			}
 			return p;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -172,8 +169,17 @@ public class HeapFile {
 	 */
 	public int getNumPages() {
 		//your code here
+		RandomAccessFile file;
 		int numPages = 0;
-		numPages = (int)(getFile().length() / HeapFile.PAGE_SIZE);
+		try {
+			file = new RandomAccessFile(getFile(), "rw");
+			numPages = (int)(file.length()/ PAGE_SIZE);
+			file.close();
+			return numPages;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return numPages;
 	}
 }
