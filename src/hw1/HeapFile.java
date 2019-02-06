@@ -103,21 +103,27 @@ public class HeapFile {
 		//your code here
 		int id = 0;
 		try {
+			HeapPage p =null;
 			while (id <= getNumPages()) {
-				HeapPage p = readPage(id);
-				for (int s = 0; s < p.getNumSlots(); s++) {
+				p = readPage(id);
+				int s;
+				for (s = 0; s < p.getNumSlots(); s++) {
 					if (!p.slotOccupied(s)) {
 						p.addTuple(t);
 						writePage(p);
 						return p;
 					}
 				}
+				if (s == p.getNumSlots()) {
+					id++;
+					HeapPage page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], id);
+				}
 			}
-			HeapPage page;
-			page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], getId());
-			page.addTuple(t);
-			writePage(page);
-			return page;
+//			HeapPage page;
+//			page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], id);
+//			page.addTuple(t);
+//			writePage(page);
+			return p;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
