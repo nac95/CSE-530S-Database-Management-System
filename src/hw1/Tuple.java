@@ -16,7 +16,7 @@ public class Tuple {
 	private int id;
 	private TupleDesc t;
 	private List<Field> fields = new LinkedList<Field>();
-//	HashMap<Integer, Field> fields = new HashMap<Integer, Field>(); 
+	
 	
 	/**
 	 * Creates a new tuple with the given description
@@ -67,13 +67,11 @@ public class Tuple {
 	 */
 	public void setField(int i, Field v) {
 		//your code here
-//		this.fields.put(i, v);
 		this.fields.add(i, v);
 	}
 	
 	public Field getField(int i) {
 		//your code here
-//		return this.fields.get(i);
 		return this.fields.get(i);
 	}
 	
@@ -83,8 +81,19 @@ public class Tuple {
 	 * the String columns to readable text).
 	 */
 	public String toString() {
-		//your code here
-		return "";
+		//source:https://github.com/thierry1129/cse530/blob/master/hw1/Tuple.java
+		StringBuffer sb = new StringBuffer("");
+        for (Field a : this.fields) {
+            if (a.getType().equals(Type.STRING)) {
+                sb.append(a.toString());
+		
+            } else {
+                // handle the printing of int type, could be wrong .
+                sb.append(a.toString());
+                sb.append(" ");
+            }
+        }
+        return sb.toString();
 	}
 }
 	

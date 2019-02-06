@@ -18,6 +18,10 @@ public class TupleDesc {
      * @param fieldAr array specifying the names of the fields. Note that names may be null.
      */
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
+    	if(typeAr.length != fieldAr.length ){
+    		System.out.println("Data type length does not match data field length");
+    		return;
+    	}
     	this.types = typeAr;
     	this.fields = fieldAr;
     }
@@ -38,8 +42,14 @@ public class TupleDesc {
      */
     public String getFieldName(int i) throws NoSuchElementException {
     		try{
-    			return this.fields[i-1];
-    		}catch(NoSuchElementException e) {
+    			if(i < this.fields.length) {
+    				return this.fields[i];
+    			}
+    			else {
+    				throw new NoSuchElementException();
+    			}
+    		}
+    		catch(NoSuchElementException e) {
     			throw e;
     		}
     }
