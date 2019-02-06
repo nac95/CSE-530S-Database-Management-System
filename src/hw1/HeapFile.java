@@ -52,8 +52,8 @@ public class HeapFile {
 		//your code here
 		try {
 			RandomAccessFile file = new RandomAccessFile(getFile(), "r");
-			file.seek(id * getTupleDesc().getSize());
-			byte[] data = new byte[getTupleDesc().getSize()];
+			file.seek(id * PAGE_SIZE);
+			byte[] data = new byte[PAGE_SIZE];
 			file.read(data);
 			file.close();
 			HeapPage page = new HeapPage(id, data, getId());
@@ -84,7 +84,7 @@ public class HeapFile {
 		try {
 			RandomAccessFile file;
 			file = new RandomAccessFile(getFile(), "rw");
-			file.seek(p.getId() * getTupleDesc().getSize());
+			file.seek(p.getId() * PAGE_SIZE);
 			file.write(p.getPageData());
 			file.close();
 		} catch (IOException e) {
@@ -105,7 +105,7 @@ public class HeapFile {
 		try {
 			while (id <= getNumPages()) {
 				HeapPage p = readPage(id);
-				for (int s = 0; s <= p.getNumSlots(); s++) {
+				for (int s = 0; s < p.getNumSlots(); s++) {
 					if (!p.slotOccupied(s)) {
 						p.addTuple(t);
 						writePage(p);
@@ -114,7 +114,7 @@ public class HeapFile {
 				}
 			}
 			HeapPage page;
-			page = new HeapPage(getNumPages() + 1, null, getId());
+			page = new HeapPage(getNumPages() + 1, new byte[PAGE_SIZE], getId());
 			page.addTuple(t);
 			writePage(page);
 			return page;

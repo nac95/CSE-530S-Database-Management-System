@@ -86,7 +86,8 @@ public class HeapPage {
 		//your code here
 		int loc = s / 8;
 		int loc2 = s % 8;
-		int bit = (header[loc] >> loc2) & 1;
+//		int bit = (header[loc] >> loc2) & 1;
+		int bit = header[loc] & (1 << loc2);
 		if (bit != 0) {
 			return true;
 		}
@@ -103,9 +104,9 @@ public class HeapPage {
 		int loc = s / 8;
 		int loc2 = s % 8;
 		if (value) {
-			header[loc] = (byte)(header[loc] | (1 << (8 - loc2 - 1)));
+			header[loc] = (byte)(header[loc] | (1 << loc2));
 		} else {
-			header[loc] = (byte)(header[loc] ^ (1 << (8 - loc2 - 1)));
+			header[loc] = (byte)(header[loc] ^ (1 << loc2));
 		}
 	}
 	
@@ -117,15 +118,12 @@ public class HeapPage {
 	 */
 	public void addTuple(Tuple t) throws Exception {
 		//your code here
-		LOOP: for (int j = 0; j <= getHeaderSize(); j++) {
-			for (int i = 0; i < 8; i++) {
-				if (!slotOccupied(j * 8 + i)) {
-					t.setPid(id);
-					t.setId(j * 8 + i);
-					setSlotOccupied(j * 8 + i, true);
-					tupleInPage.put(t, id);
-					break LOOP;
-				}
+		for (int i = 0; i < tuples.length; i++) {
+			if (!slotOccupied(i)) {
+				t.setPid(id);
+				t.setId(i);
+				setSlotOccupied(i, true);
+				tupleInPage.put(t, id);
 			}
 		}
 	}
@@ -137,9 +135,14 @@ public class HeapPage {
 	 * @throws Exception
 	 */
 	public void deleteTuple(Tuple t) {
-		//your code 
-		if (slotOccupied(t.getId())) {
-			setSlotOccupied(t.getId(), false);
+		//your code here
+		try {
+			if (slotOccupied(t.getId())) {
+				tuples[t.getId()] = null;
+				setSlotOccupied(t.getId(), false);
+			}
+		} catch(Exception e){
+			
 		}
 	}
 	
@@ -268,6 +271,15 @@ public class HeapPage {
 	 */
 	public Iterator<Tuple> iterator() {
 		//your code here
-		return tupleInPage.keySet().iterator();
+		ArrayList<Tuple> allTuple = new ArrayList<Tuple>();
+		for (int i = 0; i < tuples.length; i++) {
+			if (!slotOccupied(i)) {
+				continue;
+			} else {
+				allTuple.add(tuples[i]);
+			}
+		}
+		Iterator<Tuple> iter = allTuple.iterator();
+		return iter;
 	}
 }
