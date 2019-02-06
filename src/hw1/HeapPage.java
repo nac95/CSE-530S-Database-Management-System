@@ -18,7 +18,6 @@ public class HeapPage {
 	private TupleDesc td;
 	private int numSlots;
 	private int tableId;
-	HashMap<Tuple, Integer> tupleInPage = new HashMap<Tuple, Integer>();
 
 
 
@@ -123,7 +122,7 @@ public class HeapPage {
 				t.setPid(id);
 				t.setId(i);
 				setSlotOccupied(i, true);
-				tupleInPage.put(t, id);
+				tuples[i] = t;
 			}
 		}
 	}
