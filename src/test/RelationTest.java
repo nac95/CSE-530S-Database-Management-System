@@ -59,8 +59,8 @@ public class RelationTest {
 		Relation ar = new Relation(ahf.getAllTuples(), atd);
 		ar = ar.select(0, RelationalOperator.EQ, new IntField(530));
 		
-		assert(ar.getTuples().size() == 5);
-		assert(ar.getDesc().equals(atd));
+		assertFalse("Should be 5 tuples after select operation", ar.getTuples().size() == 5);
+		assertTrue(ar.getDesc().equals(atd));
 	}
 	
 	@Test
@@ -69,9 +69,9 @@ public class RelationTest {
 		ArrayList<Integer> c = new ArrayList<Integer>();
 		c.add(1);
 		ar = ar.project(c);
-		assert(ar.getDesc().getSize() == 4);
-		assert(ar.getTuples().size() == 8);
-		assert(ar.getDesc().getFieldName(0).equals("a2"));
+		assertTrue(ar.getDesc().getSize() == 4);
+		assertTrue(ar.getTuples().size() == 8);
+		assertTrue(ar.getDesc().getFieldName(0).equals("a2"));
 	}
 	
 	@Test
@@ -80,8 +80,8 @@ public class RelationTest {
 		Relation ar = new Relation(ahf.getAllTuples(), atd);
 		tr = tr.join(ar, 0, 0);
 		
-		assert(tr.getTuples().size() == 5);
-		assert(tr.getDesc().getSize() == 141);
+		assertTrue(tr.getTuples().size() == 5);
+		assertTrue(tr.getDesc().getSize() == 141);
 	}
 	
 	@Test
