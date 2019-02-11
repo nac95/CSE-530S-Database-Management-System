@@ -16,10 +16,8 @@ import hw1.Database;
 import hw1.HeapFile;
 import hw1.IntField;
 import hw1.TupleDesc;
-<<<<<<< HEAD
-=======
+
 import hw2.AggregateOperator;
->>>>>>> branch 'master' of git@bitbucket.org:NaC9511/cse530-sp19-chen-han.git
 import hw2.Relation;
 
 public class YourHW2Tests {
@@ -57,18 +55,16 @@ public class YourHW2Tests {
 	}
 	
 	@Test
-<<<<<<< HEAD
 	public void testGetDesc() {
 		Relation ar = new Relation(ahf.getAllTuples(), atd);
 		assert(ar.getDesc()==atd);
-		
-=======
+	}
+	@Test
 	public void testGroupBy() {
 		Relation testr = new Relation(testhf.getAllTuples(), testtd);
 		testr = testr.aggregate(AggregateOperator.MAX, true);
 		
 		assertTrue(testr.getTuples().size() == 128);
->>>>>>> branch 'master' of git@bitbucket.org:NaC9511/cse530-sp19-chen-han.git
 	}
 
 }
