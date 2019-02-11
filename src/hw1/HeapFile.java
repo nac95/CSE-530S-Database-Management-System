@@ -174,10 +174,10 @@ public class HeapFile {
 		try {
 			file = new RandomAccessFile(getFile(), "rw");
 			numPages = (int)(file.length()/ PAGE_SIZE);
-			System.out.println("file length: "+file.length());
-			System.out.println("Page size: "+PAGE_SIZE);
+//			System.out.println("file length: "+file.length());
+//			System.out.println("Page size: "+PAGE_SIZE);
 			file.close();
-			System.out.println("Num Pages: "+ numPages);
+//			System.out.println("Num Pages: "+ numPages);
 			return numPages;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

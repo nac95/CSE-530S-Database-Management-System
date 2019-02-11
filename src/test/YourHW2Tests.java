@@ -14,6 +14,7 @@ import hw1.Catalog;
 import hw1.Database;
 import hw1.HeapFile;
 import hw1.TupleDesc;
+import hw2.Relation;
 
 public class YourHW2Tests {
 
@@ -50,8 +51,10 @@ public class YourHW2Tests {
 	}
 	
 	@Test
-	public void test() {
-		fail("Not yet implemented");
+	public void testGetDesc() {
+		Relation ar = new Relation(ahf.getAllTuples(), atd);
+		assert(ar.getDesc()==atd);
+		
 	}
 
 }
