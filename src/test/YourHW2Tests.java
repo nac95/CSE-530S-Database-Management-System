@@ -53,7 +53,6 @@ public class YourHW2Tests {
 		ahf = c.getDbFile(tableId);
 	}
 	
-	
 	@Test
 	public void testGroupBy() {
 		Relation testr = new Relation(testhf.getAllTuples(), testtd);
