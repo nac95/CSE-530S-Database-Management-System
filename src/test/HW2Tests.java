@@ -197,7 +197,7 @@ public class HW2Tests {
 		Relation min = r.aggregate(AggregateOperator.MIN, false);
 		assertTrue("Aggregate should contain one tuple", max.getTuples().size() == 1);
 		sf = (StringField) min.getTuples().get(0).getField(0);
-		assertTrue("String max should return earliest string", min.getTuples().get(0).equals("a"));
+		assertTrue("String max should return earliest string", sf.getValue().equals("a"));
 	}
 	
 	@Test
