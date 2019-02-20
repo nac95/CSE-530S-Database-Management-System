@@ -48,11 +48,17 @@ public class Aggregator {
 				tuple = t;
 				count++;
 				sum = new IntField(t.getField(0).toByteArray()).getValue();
+				if (o == AggregateOperator.COUNT) {
+					tuple.setField(1, new IntField(count));
+				}
 				firstTime = false;
 			} else {
 				tuples.add(t);
 				countGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), 1);
 				sumGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), new IntField(t.getField(1).toByteArray()).getValue());
+				if (o == AggregateOperator.COUNT) {
+					tuples.get(0).setField(1, new IntField(1));
+				}
 				firstTime = false;
 			}
 			
@@ -63,48 +69,26 @@ public class Aggregator {
 					Type[] typeAr = {t.getDesc().getType(0), t.getDesc().getType(1)};
 					String[] fieldAr = {t.getDesc().getFieldName(0), t.getDesc().getFieldName(1)};
 					Tuple tuple2 = new Tuple(new TupleDesc(typeAr, fieldAr));
-					if (o == AggregateOperator.MIN) {
-						byte[] data1 = t.getField(1).toByteArray();
-						String d1 = new StringField(data1).getValue();
+					byte[] data1 = t.getField(1).toByteArray();
+					String d1 = new StringField(data1).getValue();
+					if (o == AggregateOperator.MIN || o == AggregateOperator.MAX) {
 						for (int i = 0; i < tuples.size(); i++) {
 							Tuple tuple = tuples.get(i);
 							byte[] data2 = tuple.getField(1).toByteArray();
 							String d2 = new StringField(data2).getValue();
 							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new StringField(d1.compareToIgnoreCase(d2) < 0 ? d1 : d2));
+								if (o == AggregateOperator.MIN) {
+									tuple.setField(1, new StringField(d1.compareToIgnoreCase(d2) < 0 ? d1 : d2));
+								} else {
+									tuple.setField(1, new StringField(d1.compareToIgnoreCase(d2) > 0 ? d1 : d2));
+								}
 								tuples.add(tuple);
 								insert = true;
 								tuples.remove(i);
 								break;
 							}
-						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
-					} else if (o == AggregateOperator.MAX) {
-						byte[] data1 = t.getField(1).toByteArray();
-						String d1 = new StringField(data1).getValue();
-						for (int i = 0; i < tuples.size(); i++) {
-							Tuple tuple = tuples.get(i);
-							byte[] data2 = tuple.getField(1).toByteArray();
-							String d2 = new StringField(data2).getValue();
-							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new StringField(d1.compareToIgnoreCase(d2) > 0 ? d1 : d2));
-								tuples.add(tuple);
-								insert = true;
-								tuples.remove(i);
-								break;
-							}
-						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
 						}
 					} else if (o == AggregateOperator.COUNT) {
-						if (tuples.size() == 0) {
-							tuple2.setField(1, new IntField(1));
-						}
 						for (int i = 0; i < tuples.size(); i++) {
 							Tuple tuple = tuples.get(i);
 							byte[] data2 = tuple.getField(1).toByteArray();
@@ -117,75 +101,37 @@ public class Aggregator {
 								break;
 							}
 						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
+					}
+					if (!insert) {
+						tuple2 = t;
+						tuples.add(tuple2);
 					}
 				} else if (t.getDesc().getType(1) == Type.INT && td.getType(1) == Type.INT) {
 					Type[] typeAr = {t.getDesc().getType(0), t.getDesc().getType(1)};
 					String[] fieldAr = {t.getDesc().getFieldName(0), t.getDesc().getFieldName(1)};
 					Tuple tuple2 = new Tuple(new TupleDesc(typeAr, fieldAr));
-					if (o == AggregateOperator.SUM) {
-						byte[] data1 = t.getField(1).toByteArray();
-						int d1 = new IntField(data1).getValue();
+					byte[] data1 = t.getField(1).toByteArray();
+					int d1 = new IntField(data1).getValue();
+					if (o == AggregateOperator.SUM || o == AggregateOperator.MIN || o == AggregateOperator.MAX) {
 						for (int i = 0; i < tuples.size(); i++) {
 							Tuple tuple = tuples.get(i);
 							byte[] data2 = tuple.getField(1).toByteArray();
 							int d2 = new IntField(data2).getValue();
 							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new IntField(d1 + d2));
+								if (o == AggregateOperator.SUM) {
+									tuple.setField(1, new IntField(d1 + d2));
+								} else if (o == AggregateOperator.MIN) {
+									tuple.setField(1, new IntField(d1 < d2 ? d1 : d2));
+								} else {
+									tuple.setField(1, new IntField(d1 > d2 ? d1 : d2));
+								}
 								tuples.add(tuple);
 								insert = true;
 								tuples.remove(i);
 								break;
 							}
 						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
-					} else if (o == AggregateOperator.MIN) {
-						byte[] data1 = t.getField(1).toByteArray();
-						int d1 = new IntField(data1).getValue();
-						for (int i = 0; i < tuples.size(); i++) {
-							Tuple tuple = tuples.get(i);
-							byte[] data2 = tuple.getField(1).toByteArray();
-							int d2 = new IntField(data2).getValue();
-							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new IntField(d1 < d2 ? d1 : d2));
-								tuples.add(tuple);
-								insert = true;
-								tuples.remove(i);
-								break;
-							}
-						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
-					} else if (o == AggregateOperator.MAX) {
-						byte[] data1 = t.getField(1).toByteArray();
-						int d1 = new IntField(data1).getValue();
-						for (int i = 0; i < tuples.size(); i++) {
-							Tuple tuple = tuples.get(i);
-							byte[] data2 = tuple.getField(1).toByteArray();
-							int d2 = new IntField(data2).getValue();
-							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new IntField(d1 > d2 ? d1 : d2));
-								tuples.add(tuple);
-								insert = true;
-								tuples.remove(i);
-								break;
-							}
-						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
-					} else if (o == AggregateOperator.AVG) {
-						byte[] data1 = t.getField(1).toByteArray();
-						int d1 = new IntField(data1).getValue();
+					} else if (o == AggregateOperator.AVG || o == AggregateOperator.COUNT) {
 						for (int i = 0; i < tuples.size(); i++) {
 							Tuple tuple = tuples.get(i);
 							byte[] data2 = tuple.getField(1).toByteArray();
@@ -198,41 +144,26 @@ public class Aggregator {
 								Integer newCount = countGroup.get(key) + 1;
 								countGroup.remove(key);
 								countGroup.put(key, newCount);
-								tuple.setField(1, new IntField(sumGroup.get(key) / countGroup.get(key)));
+								if (o == AggregateOperator.AVG) {
+									tuple.setField(1, new IntField(sumGroup.get(key) / countGroup.get(key)));
+								} else {
+									tuple.setField(1, new IntField(countGroup.get(key)));
+								}
+								
 								tuples.add(tuple);
 								insert = true;
 								tuples.remove(i);
 								break;
 							}
 						}
-						if (!insert) {
-							countGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), 1);
-							sumGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), new IntField(t.getField(1).toByteArray()).getValue());
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
-					} else if (o == AggregateOperator.COUNT) {
-						tuples.clear();
-						if (tuples.size() == 0) {
-							tuple2.setField(1, new IntField(1));
-						}
-						for (int i = 0; i < tuples.size(); i++) {
-							Tuple tuple = tuples.get(i);
-							byte[] data2 = tuple.getField(1).toByteArray();
-							int d2 = new IntField(data2).getValue();
-							if (t.getField(0).equals(tuple.getField(0))) {
-								tuple.setField(1, new IntField(d2 + 1));
-								tuples.add(tuple);
-								insert = true;
-								tuples.remove(i);
-								break;
-							}
-						}
-						if (!insert) {
-							tuple2 = t;
-							tuples.add(tuple2);
-						}
+					} 
+					if (!insert) {
+						countGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), 1);
+						sumGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), new IntField(t.getField(1).toByteArray()).getValue());
+						tuple2 = t;
+						tuples.add(tuple2);
 					}
+
 				}
 
 				
@@ -241,58 +172,43 @@ public class Aggregator {
 					Type[] typeAr = {Type.STRING};
 					String[] fieldAr = {t.getDesc().getFieldName(0)};
 					Tuple tuple2 = new Tuple(new TupleDesc(typeAr, fieldAr));
+					byte[] data1 = t.getField(0).toByteArray();
+					byte[] data2 = tuple.getField(0).toByteArray();
+					String d1 = new StringField(data1).getValue();
+					String d2 = new StringField(data2).getValue();
 					if (o == AggregateOperator.MIN) {
-						byte[] data1 = t.getField(0).toByteArray();
-						byte[] data2 = tuple.getField(0).toByteArray();
-						String d1 = new StringField(data1).getValue();
-						String d2 = new StringField(data2).getValue();
 						tuple2.setField(0, new StringField(d1.compareToIgnoreCase(d2) < 0 ? d1 : d2));
-						tuple = tuple2;
 					} else if (o == AggregateOperator.MAX) {
-						byte[] data1 = t.getField(0).toByteArray();
-						byte[] data2 = tuple.getField(0).toByteArray();
-						String d1 = new StringField(data1).getValue();
-						String d2 = new StringField(data2).getValue();
 						tuple2.setField(0, new StringField(d1.compareToIgnoreCase(d2) > 0 ? d1 : d2));
-						tuple = tuple2;
 					} else if (o == AggregateOperator.COUNT) {
 						count++;
 						tuple2.setField(0, new IntField(count));
-						tuple = tuple2;
 					}
+					tuple = tuple2;
 				} else if (t.getDesc().getType(0) == Type.INT && td.getType(0) == Type.INT) {
 					Type[] typeAr = {Type.INT};
 					String[] fieldAr = {t.getDesc().getFieldName(0)};
 					Tuple tuple2 = new Tuple(new TupleDesc(typeAr, fieldAr));
+					byte[] data1 = t.getField(0).toByteArray();
+					byte[] data2 = tuple.getField(0).toByteArray();
+					int d1 = new IntField(data1).getValue();
+					int d2 = new IntField(data2).getValue();
 					if (o == AggregateOperator.SUM) {
-						byte[] data1 = t.getField(0).toByteArray();
-						byte[] data2 = tuple.getField(0).toByteArray();
 						tuple2.setField(0, new IntField(new IntField(data1).getValue() + new IntField(data2).getValue()));
-						tuple = tuple2;
 					} else if (o == AggregateOperator.MIN) {
-						byte[] data1 = t.getField(0).toByteArray();
-						byte[] data2 = tuple.getField(0).toByteArray();
-						int d1 = new IntField(data1).getValue();
-						int d2 = new IntField(data2).getValue();
 						tuple2.setField(0, new IntField(d1 < d2 ? d1 : d2));
-						tuple = tuple2;
 					} else if (o == AggregateOperator.MAX) {
-						byte[] data1 = t.getField(0).toByteArray();
-						byte[] data2 = tuple.getField(0).toByteArray();
-						int d1 = new IntField(data1).getValue();
-						int d2 = new IntField(data2).getValue();
 						tuple2.setField(0, new IntField(d1 > d2 ? d1 : d2));
-						tuple = tuple2;
-					} else if (o == AggregateOperator.AVG) {
+					} else if (o == AggregateOperator.AVG || o == AggregateOperator.COUNT) {
 						count++;
 						sum += new IntField(t.getField(0).toByteArray()).getValue();
-						tuple2.setField(0, new IntField(sum / count));
-						tuple = tuple2;
-					} else if (o == AggregateOperator.COUNT) {
-						count++;
-						tuple2.setField(0, new IntField(count));
-						tuple = tuple2;
+						if (o == AggregateOperator.COUNT) {
+							tuple2.setField(0, new IntField(count));
+						} else {
+							tuple2.setField(0, new IntField(sum / count));
+						}
 					}
+					tuple = tuple2;
 				}
 
 			}
