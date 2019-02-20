@@ -162,7 +162,6 @@ public class HW2Tests {
 		c.add(1);
 		ar = ar.project(c);
 		ar = ar.aggregate(AggregateOperator.AVG, false);
-//		ar = ar.aggregate(AggregateOperator.AVG, true);
 		
 		assertTrue("Aggregates return one value", ar.getTuples().size() == 1);
 		IntField agg = (IntField) ar.getTuples().get(0).getField(0);

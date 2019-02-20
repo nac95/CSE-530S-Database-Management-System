@@ -134,11 +134,9 @@ public class Aggregator {
 					} else if (o == AggregateOperator.AVG || o == AggregateOperator.COUNT) {
 						for (int i = 0; i < tuples.size(); i++) {
 							Tuple tuple = tuples.get(i);
-							byte[] data2 = tuple.getField(1).toByteArray();
-							int d2 = new IntField(data2).getValue();
 							if (t.getField(0).equals(tuple.getField(0))) {
 								Integer key = new IntField(t.getField(0).toByteArray()).getValue();
-								Integer value = sumGroup.get(key) + d2;
+								Integer value = sumGroup.get(key) + d1;
 								sumGroup.remove(key);
 								sumGroup.put(key, value);
 								Integer newCount = countGroup.get(key) + 1;
