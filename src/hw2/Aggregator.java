@@ -3,6 +3,7 @@ package hw2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import hw1.IntField;
 import hw1.StringField;
@@ -25,6 +26,9 @@ public class Aggregator {
 	private boolean firstTime = true;
 	private int sum;
 	private int count;
+	private Map<Integer, Integer> sumGroup = new HashMap<>();
+	private Map<Integer, Integer> countGroup = new HashMap<>();
+	
 	
 	public Aggregator(AggregateOperator o, boolean groupBy, TupleDesc td) {
 		//your code here
@@ -47,6 +51,8 @@ public class Aggregator {
 				firstTime = false;
 			} else {
 				tuples.add(t);
+				countGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), 1);
+				sumGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), new IntField(t.getField(1).toByteArray()).getValue());
 				firstTime = false;
 			}
 			
@@ -178,10 +184,33 @@ public class Aggregator {
 							tuples.add(tuple2);
 						}
 					} else if (o == AggregateOperator.AVG) {
-//						count++;
-//						sum += new IntField(t.getField(0).toByteArray()).getValue();
-//						tuple2.setField(0, new IntField(sum / count));
-//						tuples.add(tuple2);
+						byte[] data1 = t.getField(1).toByteArray();
+						int d1 = new IntField(data1).getValue();
+						for (int i = 0; i < tuples.size(); i++) {
+							Tuple tuple = tuples.get(i);
+							byte[] data2 = tuple.getField(1).toByteArray();
+							int d2 = new IntField(data2).getValue();
+							if (t.getField(0).equals(tuple.getField(0))) {
+								Integer key = new IntField(t.getField(0).toByteArray()).getValue();
+								Integer value = sumGroup.get(key) + d2;
+								sumGroup.remove(key);
+								sumGroup.put(key, value);
+								Integer newCount = countGroup.get(key) + 1;
+								countGroup.remove(key);
+								countGroup.put(key, newCount);
+								tuple.setField(1, new IntField(sumGroup.get(key) / countGroup.get(key)));
+								tuples.add(tuple);
+								insert = true;
+								tuples.remove(i);
+								break;
+							}
+						}
+						if (!insert) {
+							countGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), 1);
+							sumGroup.put(new IntField(t.getField(0).toByteArray()).getValue(), new IntField(t.getField(1).toByteArray()).getValue());
+							tuple2 = t;
+							tuples.add(tuple2);
+						}
 					} else if (o == AggregateOperator.COUNT) {
 						tuples.clear();
 						if (tuples.size() == 0) {
