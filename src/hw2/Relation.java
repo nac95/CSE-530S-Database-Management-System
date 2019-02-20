@@ -151,8 +151,12 @@ public class Relation {
 	 */
 	public Relation aggregate(AggregateOperator op, boolean groupBy) {
 		//your code here
-		
-		return null;
+		Aggregator aggregator = new Aggregator(op, groupBy, td);
+		for (Tuple tuple : tuples) {
+			aggregator.merge(tuple);
+		}
+		Relation result = new Relation(aggregator.getResults(), td);
+		return result;
 	}
 	
 	public TupleDesc getDesc() {
