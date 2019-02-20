@@ -14,9 +14,14 @@ import hw1.TupleDesc;
  */
 public class Aggregator {
 
+	private AggregateOperator o;
+	private boolean groupBy;
+	private TupleDesc td;
 	public Aggregator(AggregateOperator o, boolean groupBy, TupleDesc td) {
 		//your code here
-
+		this.o = o;
+		this.groupBy = groupBy;
+		this.td = td;
 	}
 
 	/**
@@ -33,6 +38,7 @@ public class Aggregator {
 	 */
 	public ArrayList<Tuple> getResults() {
 		//your code here
+		
 		return null;
 	}
 
