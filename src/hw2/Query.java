@@ -10,6 +10,7 @@ import hw1.Field;
 import hw1.RelationalOperator;
 import hw1.Tuple;
 import hw1.TupleDesc;
+import hw1.Type;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -190,12 +191,26 @@ public class Query {
 	                ArrayList<Tuple> twoTupleList = c.getDbFile(twoTableId).getAllTuples();
 	                TupleDesc twoTDC = c.getTupleDesc(twoTableId);
 	                Relation two = new Relation(twoTupleList,twoTDC);  
-	                int fieldA = one.getDesc().nameToId(firstCol);
+	                
 	                try {
+	                	int fieldA = one.getDesc().nameToId(firstCol);
 	                	int fieldB = two.getDesc().nameToId(secondCol);
 		                joinStack.set(0, one.join(two, fieldA, fieldB));
 	                }catch(Exception e) {
-//	                	joinStack.set(0, );
+	                	String[] fieldAr = new String[one.getDesc().numFields() + two.getDesc().numFields()];
+	            		Type[] typeAr = new Type[one.getDesc().numFields() + two.getDesc().numFields()];
+	            		for (int n = 0; n < one.getDesc().numFields(); ++n) {
+	            			fieldAr[n] = one.getDesc().getFieldName(i);
+	            			typeAr[n] = one.getDesc().getType(i);
+	            		}
+	            		for (int m = 0; m < two.getDesc().numFields(); ++m) {
+	            			fieldAr[one.getDesc().numFields() + m] = two.getDesc().getFieldName(m);
+	            			typeAr[one.getDesc().numFields() + m] = two.getDesc().getType(m);
+	            		}
+	            		TupleDesc newtd = new TupleDesc(typeAr, fieldAr);
+	            		ArrayList<Tuple> emptyT = new ArrayList<Tuple>();
+	            		Relation emptyTD = new Relation(emptyT, newtd);
+	                	joinStack.set(0, emptyTD);
 	                }
 	                
 	            }
