@@ -163,31 +163,27 @@ public class Query {
 				}//else for not aggr end
 
 			}//end of selected columns loop
-			if(isAgg) {
-				
-			}else {
+			if(!isAgg) {
 				r = r.project(col);
 				afterSelectRelation.add(r);
 			}
-			 
 		}//end of relation loop
-		
-//		return afterSelectRelation.get(0);
-
 		
 		//JOIN
 		List<Join> join = sb.getJoins();
-		List<Relation> joinStack = new LinkedList<>();
-		
+		List<Relation> joinStorage = new LinkedList<>();
+		System.out.println("before Join: "+afterSelectRelation.get(0).toString());
 		if(join == null) {
 			// offer select value
-			joinStack.add(afterSelectRelation.get(0));
+			joinStorage.add(afterSelectRelation.get(0));
 		}else {
-			joinStack.add(afterSelectRelation.get(0));
+			joinStorage.add(afterSelectRelation.get(0));
 			// join the relation one by one
-			for(int i = 1; i < targetTables.size();++i) {
 				//Reference source:https://github.com/zhanghao940203/wustl_CSE530S/blob/master/CSE530S/src/hw1/Query.java
 				for (Join j : join) {
+					int i = 0;
+					System.out.println(j.toString());
+					System.out.println(join.size());
 					//parse the SQL
 	                String[] exp = j.getOnExpression().toString().split("=");
 	                //String firstTable = exp[0].split("\\.")[0].trim();
@@ -195,18 +191,21 @@ public class Query {
 	                //String secondTable = exp[1].split("\\.")[0].trim();
 	                String secondCol = exp[1].split("\\.")[1].trim();
 	                // get the two relations
-	                Relation one = joinStack.get(0);
+	                Relation one = joinStorage.get(0);
 	               // int twoTableId = c.getTableId(secondTable);
-	                int twoTableId = c.getTableId(targetTables.get(i));
 	                
+	                int twoTableId = c.getTableId(targetTables.get(i));
 	                ArrayList<Tuple> twoTupleList = c.getDbFile(twoTableId).getAllTuples();
 	                TupleDesc twoTDC = c.getTupleDesc(twoTableId);
 	                Relation two = new Relation(twoTupleList,twoTDC);  
-	                
+	                System.out.println("get col1 cols: "+firstCol+" "+secondCol);
+//	                int fieldA = one.getDesc().nameToId(firstCol);
 	                try {
 	                	int fieldA = one.getDesc().nameToId(firstCol);
 	                	int fieldB = two.getDesc().nameToId(secondCol);
-		                joinStack.set(0, one.join(two, fieldA, fieldB));
+	                	System.out.println("get b1 b2?? "+fieldA+" "+fieldB);
+	                	System.out.println("During join: "+one.join(two, fieldA, fieldB).toString());
+		                joinStorage.set(0, one.join(two, fieldA, fieldB));
 	                }catch(Exception e) {
 	                	String[] fieldAr = new String[one.getDesc().numFields() + two.getDesc().numFields()];
 	            		Type[] typeAr = new Type[one.getDesc().numFields() + two.getDesc().numFields()];
@@ -220,18 +219,15 @@ public class Query {
 	            		}
 	            		TupleDesc newtd = new TupleDesc(typeAr, fieldAr);
 	            		ArrayList<Tuple> emptyT = new ArrayList<Tuple>();
-	            		Relation emptyTD = new Relation(emptyT, newtd);
-	                	joinStack.set(0, emptyTD);
-	                }
-	                
-	            }
-			}
+	            		Relation emptyR = new Relation(emptyT, newtd);
+	            		System.out.println("empty rel: "+emptyR.toString());
+	                	joinStorage.set(0, emptyR);
+	                }// catch exception end
+	              i++; 
+	            }// join loop end
 		
-		}// else return
-		
-		
-		// return Relation(ArrayList<Tuple> l, TupleDesc td)
-		return joinStack.get(0);
+		}
+		return joinStorage.get(0);
 //		return afterJoin;
 		
 		
