@@ -1,8 +1,11 @@
 package hw2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import hw1.Catalog;
 import hw1.Database;
@@ -104,6 +107,13 @@ public class Query {
 		 		 
 		 //SELECT
 		List<SelectItem> selects = sb.getSelectItems();
+		Map<Integer, SelectItem> selectsMap = new HashMap<Integer, SelectItem>();
+		int index = 0;
+		for(SelectItem s:selects) {
+			selectsMap.put(index, s);
+			index++;
+		}
+		Iterator<SelectItem> it1 = selectsMap.values().iterator();
 		ColumnVisitor cv = new ColumnVisitor();
 		List<Expression> groupbys = sb.getGroupByColumnReferences();//group by
 		
@@ -118,10 +128,9 @@ public class Query {
 			AggregateOperator op;
 			
 			//loop through all the selected columns
-			for(SelectItem s: selects) {
+			while(it1.hasNext()) {
+				SelectItem s = it1.next();
 				s.accept(cv);
-				//agg.add( cv.isAggregate());
-				
 				//check if aggregate
 				// it is aggregate
 				if(cv.isAggregate()) {
@@ -135,11 +144,11 @@ public class Query {
 		                String nameCol = cv.getColumn();
 		                try {
 		                	col.add(rdc.nameToId(nameCol));
+		                	selects.remove(s);
 		                }catch(Exception e) {
 		                // in case select other table's column
 		                }
 		                isAgg = true;
-		                // may have problem
 		                r = r.project(col).aggregate(op, groupbys != null);
 		                afterSelectRelation.add(r);
 					}
@@ -156,6 +165,7 @@ public class Query {
 						try {
 							int idCol = rdc.nameToId(cvName);
 		                    col.add(idCol);
+		                    selects.remove(s);
 						}catch(Exception e) {
 							// in case select other table's column
 						} 
@@ -179,27 +189,21 @@ public class Query {
 		}else {
 			joinStorage.add(afterSelectRelation.get(0));
 			// join the relation one by one
+//			for(int i = 1; i < afterSelectRelation.size();++i) {
 				//Reference source:https://github.com/zhanghao940203/wustl_CSE530S/blob/master/CSE530S/src/hw1/Query.java
-				for (Join j : join) {
-					int i = 0;
+			int i = 1;	
+			for (Join j : join) {
 					System.out.println(j.toString());
 					System.out.println(join.size());
 					//parse the SQL
 	                String[] exp = j.getOnExpression().toString().split("=");
-	                //String firstTable = exp[0].split("\\.")[0].trim();
 	                String firstCol = exp[0].split("\\.")[1].trim();
-	                //String secondTable = exp[1].split("\\.")[0].trim();
 	                String secondCol = exp[1].split("\\.")[1].trim();
 	                // get the two relations
 	                Relation one = joinStorage.get(0);
-	               // int twoTableId = c.getTableId(secondTable);
-	                
-	                int twoTableId = c.getTableId(targetTables.get(i));
-	                ArrayList<Tuple> twoTupleList = c.getDbFile(twoTableId).getAllTuples();
-	                TupleDesc twoTDC = c.getTupleDesc(twoTableId);
-	                Relation two = new Relation(twoTupleList,twoTDC);  
-	                System.out.println("get col1 cols: "+firstCol+" "+secondCol);
-//	                int fieldA = one.getDesc().nameToId(firstCol);
+	                Relation two = afterSelectRelation.get(i);
+	                System.out.println("rel 1: "+one.toString());
+	                System.out.println("rel 2: "+two.toString());
 	                try {
 	                	int fieldA = one.getDesc().nameToId(firstCol);
 	                	int fieldB = two.getDesc().nameToId(secondCol);
@@ -223,8 +227,45 @@ public class Query {
 	            		System.out.println("empty rel: "+emptyR.toString());
 	                	joinStorage.set(0, emptyR);
 	                }// catch exception end
-	              i++; 
+	                i++;
+	                
+//	                // get the two relations
+//	                Relation one = joinStorage.get(0);
+//	               // int twoTableId = c.getTableId(secondTable);
+//	                
+//	                int twoTableId = c.getTableId(targetTables.get(i));
+//	                ArrayList<Tuple> twoTupleList = c.getDbFile(twoTableId).getAllTuples();
+//	                TupleDesc twoTDC = c.getTupleDesc(twoTableId);
+//	                Relation two = new Relation(twoTupleList,twoTDC);  
+//	                System.out.println("get col1 cols: "+firstCol+" "+secondCol);
+////	                int fieldA = one.getDesc().nameToId(firstCol);
+//	                try {
+//	                	int fieldA = one.getDesc().nameToId(firstCol);
+//	                	int fieldB = two.getDesc().nameToId(secondCol);
+//	                	System.out.println("get b1 b2?? "+fieldA+" "+fieldB);
+//	                	System.out.println("During join: "+one.join(two, fieldA, fieldB).toString());
+//		                joinStorage.set(0, one.join(two, fieldA, fieldB));
+//	                }catch(Exception e) {
+//	                	String[] fieldAr = new String[one.getDesc().numFields() + two.getDesc().numFields()];
+//	            		Type[] typeAr = new Type[one.getDesc().numFields() + two.getDesc().numFields()];
+//	            		for (int n = 0; n < one.getDesc().numFields(); ++n) {
+//	            			fieldAr[n] = one.getDesc().getFieldName(i);
+//	            			typeAr[n] = one.getDesc().getType(i);
+//	            		}
+//	            		for (int m = 0; m < two.getDesc().numFields(); ++m) {
+//	            			fieldAr[one.getDesc().numFields() + m] = two.getDesc().getFieldName(m);
+//	            			typeAr[one.getDesc().numFields() + m] = two.getDesc().getType(m);
+//	            		}
+//	            		TupleDesc newtd = new TupleDesc(typeAr, fieldAr);
+//	            		ArrayList<Tuple> emptyT = new ArrayList<Tuple>();
+//	            		Relation emptyR = new Relation(emptyT, newtd);
+//	            		System.out.println("empty rel: "+emptyR.toString());
+//	                	joinStorage.set(0, emptyR);
+	               // }// catch exception end
+	
 	            }// join loop end
+//			}
+				
 		
 		}
 		return joinStorage.get(0);
