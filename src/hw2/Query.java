@@ -123,35 +123,46 @@ public class Query {
 				//agg.add( cv.isAggregate());
 				
 				//check if aggregate
+				// it is aggregate
 				if(cv.isAggregate()) {
 					op = cv.getOp();
-	                String nameCol = cv.getColumn();
-	                try {
-	                	col.add(rdc.nameToId(nameCol));
-	                }catch(Exception e) {
-	                // in case select other table's column
-	                }
-	                isAgg = true;
-	                // may have problem
-	                r = r.project(col).aggregate(op, groupbys != null);
-	                afterSelectRelation.add(r);
+					if(cv.getColumn()=="*") {
+						r = r.aggregate(op, groupbys != null);
+						afterSelectRelation.add(r);
+						
+					}else {
+						
+		                String nameCol = cv.getColumn();
+		                try {
+		                	col.add(rdc.nameToId(nameCol));
+		                }catch(Exception e) {
+		                // in case select other table's column
+		                }
+		                isAgg = true;
+		                // may have problem
+		                r = r.project(col).aggregate(op, groupbys != null);
+		                afterSelectRelation.add(r);
+					}
 				}
-				//check if select all
-				else if(cv.getColumn()=="*") {
-					afterSelectRelation.add(r);
-				}
-				//normal situation
-				else{
-					String cvName = cv.getColumn();
-					try {
-						int idCol = rdc.nameToId(cvName);
-	                    col.add(idCol);
-					}catch(Exception e) {
-						// in case select other table's column
-					} 
-				}	
-			}//end of selected columns loop
+				// if it is not aggregate
+				else {
+					//check if select all
+					if(cv.getColumn()=="*") {
+						afterSelectRelation.add(r);
+					}
+					//normal situation
+					else{
+						String cvName = cv.getColumn();
+						try {
+							int idCol = rdc.nameToId(cvName);
+		                    col.add(idCol);
+						}catch(Exception e) {
+							// in case select other table's column
+						} 
+					}// else end
+				}//else for not aggr end
 
+			}//end of selected columns loop
 			if(isAgg) {
 				
 			}else {
