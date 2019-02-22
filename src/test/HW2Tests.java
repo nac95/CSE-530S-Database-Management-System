@@ -137,6 +137,7 @@ public class HW2Tests {
 		x.add(0);
 		rel = rel.project(x);
 		Relation relMax = rel.aggregate(AggregateOperator.MAX, false);
+//		Relation relMax = rel.aggregate(AggregateOperator.MAX, true);
 		assertTrue("Aggregator MAX is incorrect (rows)", relMax.getTuples().size() == 1);
 		IntField testAgg = (IntField) relMax.getTuples().get(0).getField(0);
 		assertTrue("Aggregate MAX is incorrect (value)", testAgg.getValue() == 530);
@@ -162,7 +163,7 @@ public class HW2Tests {
 		c.add(1);
 		ar = ar.project(c);
 		ar = ar.aggregate(AggregateOperator.AVG, false);
-		
+//		ar = ar.aggregate(AggregateOperator.AVG, true);
 		assertTrue("Aggregates return one value", ar.getTuples().size() == 1);
 		IntField agg = (IntField) ar.getTuples().get(0).getField(0);
 		assertTrue("Result of AVG should be an int", agg.getValue() == 4); // Result should be an int		
