@@ -117,5 +117,82 @@ public class YourHW3Tests {
 		assertTrue(err.get(0).getField().equals(new IntField(11)));
 		assertTrue(err.get(1).getField().equals(new IntField(12)));
 	}
+	
+	@Test
+	public void testBPlusTreeDelete() {
+
+		//create a tree, insert a bunch of values
+		BPlusTree bt = new BPlusTree(3, 4);
+		bt.insert(new Entry(new IntField(9), 0));
+		bt.insert(new Entry(new IntField(4), 0));
+		bt.insert(new Entry(new IntField(12), 0));
+		bt.insert(new Entry(new IntField(7), 0));
+		bt.insert(new Entry(new IntField(2), 0));
+		bt.insert(new Entry(new IntField(6), 0));
+		bt.insert(new Entry(new IntField(1), 0));
+		bt.insert(new Entry(new IntField(3), 0));
+		bt.insert(new Entry(new IntField(10), 0));
+		bt.insert(new Entry(new IntField(11), 0));
+		
+		bt.delete(new Entry(new IntField(9), 0));
+
+		//verify root properties
+		Node root = bt.getRoot();
+
+		assertTrue(root.isLeafNode() == false);
+
+		InnerNode in = (InnerNode)root;
+
+		ArrayList<Field> k = in.getKeys();
+		ArrayList<Node> c = in.getChildren();
+
+		assertTrue(k.get(0).compare(RelationalOperator.EQ, new IntField(3)));
+		assertTrue(k.get(1).compare(RelationalOperator.EQ, new IntField(7)));
+		assertTrue(k.get(2).compare(RelationalOperator.EQ, new IntField(10)));
+
+		//grab left and right children from root
+		InnerNode l1 = (InnerNode)c.get(0);
+		InnerNode l2 = (InnerNode)c.get(1);
+		InnerNode r1 = (InnerNode)c.get(2);
+		InnerNode r2 = (InnerNode)c.get(3);
+
+		assertTrue(l1.isLeafNode() == true);
+		assertTrue(l2.isLeafNode() == true);
+		assertTrue(r1.isLeafNode() == true);
+		assertTrue(r2.isLeafNode() == true);
+
+		assertTrue(l1.getDegree()==1);
+		assertTrue(l2.getDegree()==1);
+		assertTrue(r1.getDegree()==1);
+		assertTrue(r2.getDegree()==1);
+
+		//check values in left nodes
+		ArrayList<Field> kl1 = l1.getKeys();
+		//ArrayList<Node> cl1 = l1.getChildren();
+
+		assertTrue(kl1.get(0).compare(RelationalOperator.EQ, new IntField(2)));
+		assertTrue(kl1.get(1).compare(RelationalOperator.EQ, new IntField(3)));
+
+		ArrayList<Field> kl2 = l2.getKeys();
+		//ArrayList<Node> cl2 = l2.getChildren();
+
+		assertTrue(kl2.get(0).compare(RelationalOperator.EQ, new IntField(4)));
+		assertTrue(kl2.get(1).compare(RelationalOperator.EQ, new IntField(6)));
+
+		//check values in left nodes
+		ArrayList<Field> kr1 = r1.getKeys();
+		//ArrayList<Node> cr1 = r1.getChildren();
+
+		assertTrue(kr1.get(0).compare(RelationalOperator.EQ, new IntField(9)));
+		assertTrue(kr1.get(1).compare(RelationalOperator.EQ, new IntField(10)));
+
+		ArrayList<Field> kr2 = r2.getKeys();
+		//ArrayList<Node> cr2 = r2.getChildren();
+
+		assertTrue(kr2.get(0).compare(RelationalOperator.EQ, new IntField(11)));
+		assertTrue(kr2.get(1).compare(RelationalOperator.EQ, new IntField(12)));
+
+	}
+
 
 }
