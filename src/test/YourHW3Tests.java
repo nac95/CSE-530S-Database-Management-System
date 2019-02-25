@@ -25,7 +25,7 @@ public class YourHW3Tests {
 	public void testComplexInsert() {
 
 		//create a tree, insert a bunch of values
-		BPlusTree bt = new BPlusTree(3, 4);
+		BPlusTree bt = new BPlusTree(4, 3);
 		bt.insert(new Entry(new IntField(9), 0));
 		bt.insert(new Entry(new IntField(4), 0));
 		bt.insert(new Entry(new IntField(12), 0));
@@ -122,7 +122,7 @@ public class YourHW3Tests {
 	public void testBPlusTreeDelete() {
 
 		//create a tree, insert a bunch of values
-		BPlusTree bt = new BPlusTree(3, 4);
+		BPlusTree bt = new BPlusTree(4, 3);
 		bt.insert(new Entry(new IntField(9), 0));
 		bt.insert(new Entry(new IntField(4), 0));
 		bt.insert(new Entry(new IntField(12), 0));
