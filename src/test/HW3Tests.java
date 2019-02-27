@@ -453,7 +453,6 @@ public class HW3Tests {
 		assertTrue(lc.size() == 2);
 		
 		assertTrue(lk.get(0).compare(RelationalOperator.EQ, new IntField(2))); 
-		assertTrue(lk.get(1).compare(RelationalOperator.EQ, new IntField(7))); 
 		
 		assertTrue(lc.get(0).isLeafNode());
 		assertTrue(lc.get(1).isLeafNode());
@@ -462,11 +461,11 @@ public class HW3Tests {
 		LeafNode lcr = (LeafNode) lc.get(1);
 		
 		ArrayList<Entry> lclE = lcl.getEntries();
-		assertTrue(lclE.get(0).equals(new IntField(1)));
-		assertTrue(lclE.get(1).equals(new IntField(2)));
+		assertTrue(lclE.get(0).getField().equals(new IntField(1)));
+		assertTrue(lclE.get(1).getField().equals(new IntField(2)));
 
 		ArrayList<Entry> lcrE = lcr.getEntries();
-		assertTrue(lcrE.get(0).equals(new IntField(7)));
+		assertTrue(lcrE.get(0).getField().equals(new IntField(7)));
 		
 		//Check Right Subtree
 		InnerNode r2 = (InnerNode)c2.get(1);
@@ -485,11 +484,11 @@ public class HW3Tests {
 		LeafNode rcr = (LeafNode) rc.get(1);
 		
 		ArrayList<Entry> rclE = rcl.getEntries();
-		assertTrue(rclE.get(0).equals(new IntField(8)));
+		assertTrue(rclE.get(0).getField().equals(new IntField(8)));
 		
 		ArrayList<Entry> rcrE = rcr.getEntries();
-		assertTrue(rcrE.get(0).equals(new IntField(9)));
-		assertTrue(rcrE.get(1).equals(new IntField(12)));
+		assertTrue(rcrE.get(0).getField().equals(new IntField(9)));
+		assertTrue(rcrE.get(1).getField().equals(new IntField(12)));
 	}
 	
 	@Test
