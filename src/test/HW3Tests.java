@@ -449,7 +449,7 @@ public class HW3Tests {
 		ArrayList<Field> lk = l2.getKeys();
 		ArrayList<Node> lc = l2.getChildren();
 		
-		assertTrue(lk.size() == 2);
+		assertTrue(lk.size() == 1);
 		assertTrue(lc.size() == 2);
 		
 		assertTrue(lk.get(0).compare(RelationalOperator.EQ, new IntField(2))); 
