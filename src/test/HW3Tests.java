@@ -527,8 +527,8 @@ public class HW3Tests {
 
 		//check values
 		ArrayList<Entry> c1entries = c1.getEntries();
-		assertTrue(c0entries.get(0).getField().equals(new IntField(9)));
-		assertTrue(c0entries.get(1).getField().equals(new IntField(12)));
+		assertTrue(c1entries.get(0).getField().equals(new IntField(9)));
+		assertTrue(c1entries.get(1).getField().equals(new IntField(12)));
 	}
 	
 	@Test
