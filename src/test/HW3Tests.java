@@ -703,7 +703,7 @@ public class HW3Tests {
 		InnerNode l = (InnerNode)root_c.get(0);
 		InnerNode r = (InnerNode)root_c.get(1);
 		assertTrue(l.getKeys().get(0).compare(RelationalOperator.EQ, new IntField(2)));
-		assertTrue(l.getKeys().get(1).compare(RelationalOperator.EQ, new IntField(7)));
+		assertTrue(r.getKeys().get(0).compare(RelationalOperator.EQ, new IntField(7)));
 		
 		ArrayList<Node> lc = l.getChildren();
 		assertTrue(lc.get(0).isLeafNode() == true);
