@@ -31,7 +31,6 @@ public class InnerNode implements Node {
 	public int getDegree() {
 		//your code here
 		return degree;
-		
 	}
 	
 	public boolean isLeafNode() {
