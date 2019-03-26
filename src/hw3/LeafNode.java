@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import hw1.Field;
 import hw1.IntField;
+import hw1.RelationalOperator;
 import hw1.StringField;
 import hw1.Type;
 
@@ -51,6 +52,19 @@ public class LeafNode implements Node {
 	}
 	public ArrayList<Node> getChildren(){
 		return null;
+	}
+	
+	public Field getMaxKey() {
+		Field max = null;
+		System.out.println("default max"+max);
+		for(Entry ne: this.entries) {
+			Field f = ne.getField();
+			if(f.compare(RelationalOperator.GTE, max)||max == null) {
+				max = f;
+			}
+		}
+		System.out.println("max"+max);
+		return max;
 	}
 	
 	public void addKeys(Entry entry) {

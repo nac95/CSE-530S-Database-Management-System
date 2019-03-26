@@ -22,7 +22,7 @@ public class BPlusTree {
     
     public LeafNode search(Field f) {
     	//your code here
-    	if(f==null|root==null) {	
+    	if(f==null||root==null) {	
     		return null;
     	}else {
     		return searchLeaf(f,root);
@@ -49,7 +49,7 @@ public class BPlusTree {
     		}else 
     		{
     			for(int i = 0; i < keys.size();++i) {
-    				if(f.compare(RelationalOperator.GT,keys.get(i))&f.compare(RelationalOperator.LTE, keys.get(i+1))) {
+    				if(f.compare(RelationalOperator.GT,keys.get(i))&&f.compare(RelationalOperator.LTE, keys.get(i+1))) {
     					return searchLeaf(f,children.get(i+1));
     				}
     			}
@@ -119,8 +119,8 @@ public class BPlusTree {
 		    				// code needed here!!!!!!!!!
 		    			}else {
 		    				parent.setChildren(n);
-		    				// set keys here
-		    				//code needed!!!!!!
+		    				Field max = n.getMaxKey();
+		    				parent.addKeys(max);
 		    			}
 		    		}
     			}// bracket for target with no parent
@@ -135,8 +135,8 @@ public class BPlusTree {
 		    				// code needed here!!!!!!!!!
 		    			}else {
 		    				parent.setChildren(n);
-		    				// set keys here
-		    				//code needed!!!!!!
+		    				Field max = n.getMaxKey();
+		    				parent.addKeys(max);
 		    			}
     				}// for loop end
     			}// bracket for target has a parent		
@@ -145,12 +145,13 @@ public class BPlusTree {
     }
     
     public ArrayList<LeafNode> splitLeafNode(Entry e, LeafNode n) {
-    	ArrayList<Entry> oldEntires = n.getEntries();
-    	
+    	ArrayList<Entry> oldEntries = n.getEntries();
+    	System.out.println(oldEntries);
     	return null;
     }
     
     public void splitParentNode(Node n) {
+    	
     	
     }
     
