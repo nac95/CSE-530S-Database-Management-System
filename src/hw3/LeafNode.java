@@ -9,8 +9,8 @@ import hw1.Type;
 
 public class LeafNode implements Node {
 	
-	int degree;
-	ArrayList<Entry> entries = new ArrayList<>();
+	private int degree;
+	private ArrayList<Entry> entries = new ArrayList<>();
 	
 	
 	public LeafNode(int degree) {

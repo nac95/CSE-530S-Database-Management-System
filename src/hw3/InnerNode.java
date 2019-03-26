@@ -9,9 +9,9 @@ import hw1.Type;
 
 public class InnerNode implements Node {
 	
-	int degree;
-	ArrayList<Field> keys = new ArrayList<>();
-	ArrayList<Node> children = new ArrayList<>();
+	private int degree;
+	private ArrayList<Field> keys = new ArrayList<>();
+	private ArrayList<Node> children = new ArrayList<>();
 	
 	public InnerNode(int degree) {
 		//your code here

@@ -4,6 +4,8 @@ package hw3;
 import hw1.Field;
 
 public class BPlusTree {
+	
+	private Node root;
     
     public BPlusTree(int pInner, int pLeaf) {
     	//your code here
@@ -24,7 +26,7 @@ public class BPlusTree {
     
     public Node getRoot() {
     	//your code here
-    	return null;
+    	return root;
     }
     
 
