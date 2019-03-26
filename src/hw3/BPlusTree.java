@@ -88,7 +88,7 @@ public class BPlusTree {
     		//target identified
     		LeafNode target = this.search(e.getField());
     		// if target is not full, add it directly
-    		if(!target.isFull()) {
+    		if(!target.isExceedOne()) {
     	    	target.addKeys(e);
     	    }
     		// if target is full, split the node 
@@ -111,7 +111,7 @@ public class BPlusTree {
 		    			}
 	    			// try to add the node to this newly created parent
 		    		for(LeafNode n : splitNodes) {
-		    			if(parent.isFull()) {
+		    			if(parent.isExceedOne()) {
 		    				//split the parent
 		    				splitParentNode(parent);
 		    				// add nodes to the parents
