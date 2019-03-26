@@ -13,11 +13,20 @@ public class InnerNode implements Node {
 	private ArrayList<Field> keys = new ArrayList<>();
 	private ArrayList<Node> children = new ArrayList<>();
 	private Node parent;
-	
+	private boolean isRoot;
 	
 	public InnerNode(int degree) {
 		//your code here
 		this.degree = degree;
+		this.isRoot = false;
+	}
+	
+	public void setRoot() {
+		this.isRoot = true;
+	}
+	
+	public boolean isRoot(){
+		return this.isRoot;
 	}
 	
 	public ArrayList<Field> getKeys() {
@@ -48,6 +57,10 @@ public class InnerNode implements Node {
 	
 	public void setParent(Node parent) {
 		this.parent = parent;
+	}
+	
+	public InnerNode getParent() {
+		return (InnerNode) this.parent;
 	}
 	
 	public boolean isFull() {

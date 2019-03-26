@@ -43,12 +43,12 @@ public class BPlusTree {
     		ArrayList<Node> children = inner.getChildren();
     		if(f.compare(RelationalOperator.LTE, keys.get(0))) {
     			return searchLeaf(f,children.get(0));
-    		}else if(f.compare(RelationalOperator.GT, keys.get(keys.size()))){
+    		}else if(f.compare(RelationalOperator.GT, keys.get(keys.size()-1))){
     			// check the index of the key
-    			return searchLeaf(f,children.get(children.size()));
+    			return searchLeaf(f,children.get(children.size()-1));
     		}else 
     		{
-    			for(int i = 0; i < keys.size();++i) {
+    			for(int i = 0; i < keys.size()-1;++i) {
     				if(f.compare(RelationalOperator.GT,keys.get(i))&&f.compare(RelationalOperator.LTE, keys.get(i+1))) {
     					return searchLeaf(f,children.get(i+1));
     				}
@@ -151,7 +151,6 @@ public class BPlusTree {
     }
     
     public void splitParentNode(Node n) {
-    	
     	
     }
     
