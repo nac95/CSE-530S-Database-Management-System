@@ -9,7 +9,7 @@ import hw1.RelationalOperator;
 public class BPlusTree {
 	
 	private Node root;
-	//pInner: maximum number of keys in an inner node.
+	//pInner: maximum number of children in an inner node.
 	private int pInner;
 	//pLeaf: maximum number of data pointers in a leaf node.
 	private int pLeaf;
@@ -154,7 +154,7 @@ public class BPlusTree {
     }
     
     public void splitRootNode() {
-    	//Nana start here
+    	
     }
     
     public void delete(Entry e) {

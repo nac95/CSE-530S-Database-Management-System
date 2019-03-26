@@ -63,13 +63,12 @@ public class InnerNode implements Node {
 		return (InnerNode) this.parent;
 	}
 	
-	public boolean isFull() {
+	public boolean isExceedOne() {
 		// cannot have more sub tree
-		if(this.degree > this.keys.size()) {
+		if (this.degree == this.keys.size()) {
 			return true;
-		}else {
-			return false;
 		}
+		return false;
 	}
 	
 	public void addKeys(Field key) {

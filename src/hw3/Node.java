@@ -7,7 +7,7 @@ public interface Node {
 	
 	public int getDegree();
 	public boolean isLeafNode();
-	public boolean isFull();
+	public boolean isExceedOne();
 	public void setParent(Node parent);
 	public ArrayList<Node> getChildren();
 }

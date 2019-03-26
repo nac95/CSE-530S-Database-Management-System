@@ -14,7 +14,6 @@ public class LeafNode implements Node {
 	private ArrayList<Entry> entries = new ArrayList<>();
 	private Node parent;
 	
-	
 	public LeafNode(int degree) {
 		//your code here
 		this.degree = degree;
@@ -34,9 +33,9 @@ public class LeafNode implements Node {
 		return true;
 	}
 	
-	public boolean isFull() {
+	public boolean isExceedOne() {
 		// may not be right
-		if(this.degree > this.entries.size()) {
+		if(this.degree + 1 == this.entries.size()) {
 			return true;
 		}else {
 			return false;
