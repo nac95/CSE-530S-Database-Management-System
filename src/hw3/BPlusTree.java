@@ -58,6 +58,38 @@ public class BPlusTree {
     	}
     }
     
+    
+    public LeafNode searchTargetLeaf(Field f, Node n) {
+    	System.out.println("f"+f.toString());
+    	System.out.println("Node"+n.toString());
+    	if(f==null||n==null) {	
+    		return null;
+    	}
+    	if(n.isLeafNode()) {
+    		System.out.println("Node is leaf"+n.toString());
+    		return (LeafNode) n;
+    	}
+    	else{
+    		InnerNode inner =  (InnerNode) n;
+    		ArrayList<Field> keys = inner.getKeys();
+    		ArrayList<Node> children = inner.getChildren();
+    		if(f.compare(RelationalOperator.LTE, keys.get(0))) {
+    			return searchLeaf(f,children.get(0));
+    		}else if(f.compare(RelationalOperator.GT, keys.get(keys.size()-1))){
+    			// check the index of the key
+    			return searchLeaf(f,children.get(children.size()-1));
+    		}else 
+    		{
+    			for(int i = 0; i < keys.size()-1;++i) {
+    				if(f.compare(RelationalOperator.GT,keys.get(i))&&f.compare(RelationalOperator.LTE, keys.get(i+1))) {
+    					return searchLeaf(f,children.get(i+1));
+    				}
+    			}
+    			return null;
+    		}
+    	}
+    }
+    
    /**
     * Search for the node where the new record should go
 		If the target node is not full, add the record
@@ -86,18 +118,14 @@ public class BPlusTree {
     	// if not empty, identify the target node, and make heavy operations
     	else {
     		//target identified
-    		LeafNode target = this.search(e.getField());
-    		// if target is not full, add it directly
-    		if(!target.isExceedOne()) {
-    	    	target.addKeys(e);
-    	    }
-    		// if target is full, split the node 
+    		LeafNode target = this.searchTargetLeaf(e.getField(),this.root);
+    		//add entry whatever the node
+    		target.addKeys(e);
     		
-    		//add it to the parent node 	
-    		else {
+    		//check if exceed one, if not exceed, do nothing
+    		if(target.isExceedOne()) {
     			// split the leaf node
-    			ArrayList<LeafNode> splitNodes = splitLeafNode(e, target);
-    			// check the parent node before adding the splitted node to the parent
+    			ArrayList<LeafNode> splitNodes = splitLeafNode(target);
     			// if the target node does not have a parent
     			if(target.getParent()==null) {
     				System.out.println(target.getParent());
@@ -110,6 +138,11 @@ public class BPlusTree {
 		    				parent.setChildren(n);
 		    			}
 	    			// try to add the node to this newly created parent
+		    		
+		    			
+		    			
+		    			
+		    			
 		    		for(LeafNode n : splitNodes) {
 		    			if(parent.isExceedOne()) {
 		    				//split the parent
@@ -127,7 +160,7 @@ public class BPlusTree {
     			else {
     				InnerNode parent = (InnerNode) target.getParent();
     				for(LeafNode n : splitNodes) {
-    					if(parent.isFull()) {
+    					if(parent.isExceedOne()) {
 		    				//split the parent
 		    				splitParentNode(parent);
 		    				// add nodes to the parents
@@ -139,13 +172,12 @@ public class BPlusTree {
 		    			}
     				}// for loop end
     			}// bracket for target has a parent		
-    	    }	
+    		}// if exceed one bracket
     	}	
     }
     
-    public ArrayList<LeafNode> splitLeafNode(Entry e, LeafNode n) {
-    	ArrayList<Entry> oldEntries = n.getEntries();
-    	System.out.println(oldEntries);
+    public ArrayList<LeafNode> splitLeafNode(LeafNode n) {
+    	
     	return null;
     }
     
