@@ -72,32 +72,6 @@ public class BPlusTree {
 		Repeat until a split is not needed
 		If the root needs to split:
 		Create a new root with one key and two pointers
-		
-		  //Make new node
-		   * LeafNode n
-		   * n.add(half of old )
-		   * for (i< half ){
-		   *   n1.addKeys(e)
-		   *   n1.setParent
-		   * }
-		   * for(half<i){
-		   *   n2.addKeys(e)
-		   *   n2.setParent
-		   * }
-		   * if parent.is not full{
-		   *  pa.add(n1)
-		   *  pa.add(n2)
-		   * }
-		   * if parent node is full{
-		   *  // split the parent
-		   *  node par -- par1 par2
-		   *  par.entri.size/2 -- par 1
-		   *  other par 2
-		   *  
-		   *  
-		   * }
-		   * 
-		   * 
 		}
     * @param e
     */
@@ -172,6 +146,7 @@ public class BPlusTree {
     
     public ArrayList<LeafNode> splitLeafNode(Entry e, LeafNode n) {
     	ArrayList<Entry> oldEntires = n.getEntries();
+    	
     	return null;
     }
     
