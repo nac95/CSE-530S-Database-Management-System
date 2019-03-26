@@ -12,6 +12,7 @@ public class InnerNode implements Node {
 	private int degree;
 	private ArrayList<Field> keys = new ArrayList<>();
 	private ArrayList<Node> children = new ArrayList<>();
+	private Node parent;
 	
 	
 	public InnerNode(int degree) {
@@ -26,6 +27,9 @@ public class InnerNode implements Node {
 	
 	public ArrayList<Node> getChildren() {
 		//your code here
+		for(Node c: this.children) {
+			c.setParent(this);
+		}
 		return children;
 	}
 
@@ -36,6 +40,10 @@ public class InnerNode implements Node {
 	
 	public boolean isLeafNode() {
 		return false;
+	}
+	
+	public void setParent(Node parent) {
+		this.parent = parent;
 	}
 	
 	public void addKeys(Field key) {

@@ -11,6 +11,7 @@ public class LeafNode implements Node {
 	
 	private int degree;
 	private ArrayList<Entry> entries = new ArrayList<>();
+	private Node parent;
 	
 	
 	public LeafNode(int degree) {
@@ -30,6 +31,10 @@ public class LeafNode implements Node {
 	
 	public boolean isLeafNode() {
 		return true;
+	}
+	
+	public void setParent(Node parent) {
+		this.parent = parent;
 	}
 	
 	public void addKeys(Entry entry) {
