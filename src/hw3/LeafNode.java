@@ -33,6 +33,15 @@ public class LeafNode implements Node {
 		return true;
 	}
 	
+	public boolean isFull() {
+		// may not be right
+		if(this.degree > this.entries.size()) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
 	public void setParent(Node parent) {
 		this.parent = parent;
 	}

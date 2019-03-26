@@ -33,6 +33,10 @@ public class InnerNode implements Node {
 		return children;
 	}
 
+	public void setChildren(Node n) {
+		this.children.add(n);
+	}
+	
 	public int getDegree() {
 		//your code here
 		return degree;
@@ -44,6 +48,15 @@ public class InnerNode implements Node {
 	
 	public void setParent(Node parent) {
 		this.parent = parent;
+	}
+	
+	public boolean isFull() {
+		// cannot have more sub tree
+		if(this.degree > this.keys.size()) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	public void addKeys(Field key) {
