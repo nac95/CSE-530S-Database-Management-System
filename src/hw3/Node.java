@@ -1,5 +1,7 @@
 package hw3;
 
+import java.util.ArrayList;
+
 public interface Node {
 	
 	
@@ -7,4 +9,5 @@ public interface Node {
 	public boolean isLeafNode();
 	public boolean isFull();
 	public void setParent(Node parent);
+	public ArrayList<Node> getChildren();
 }

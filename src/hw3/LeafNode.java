@@ -42,8 +42,15 @@ public class LeafNode implements Node {
 		}
 	}
 	
+	public Node getParent() {
+		return this.parent;
+	}
+	
 	public void setParent(Node parent) {
 		this.parent = parent;
+	}
+	public ArrayList<Node> getChildren(){
+		return null;
 	}
 	
 	public void addKeys(Entry entry) {

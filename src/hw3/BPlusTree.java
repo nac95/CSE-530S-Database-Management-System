@@ -120,36 +120,62 @@ public class BPlusTree {
     	    }
     		// if target is full, split the node 
     		
-    		//add it to the parent node 
-    		// if don't have one, then create one? use the previous node?		
+    		//add it to the parent node 	
     		else {
-    	    	LeafNode insertNode = new LeafNode(pLeaf);		
-    	    	//if an insertion is requested for a value that is already in the tree, the tree should not change.
-			    for(int i=0; i<target.getEntries().size(); i++) {
-					if(e.getField().compare(RelationalOperator.EQ, target.getEntries().get(i).getField())){
-						return;
-					}
-				}// end of for loop	
-			    
-			    // if insert a value that is not in the tree
-			    ArrayList<Entry> targetEntries = target.getEntries();
-			    int half = (targetEntries.size()+1)/2;
-			    for(int i = 0; i < targetEntries.size(); i++) {
-			    	e.getField().compare(RelationalOperator.GT, targetEntries.get(i).getField());
-			    	e.getField().compare(RelationalOperator.LT, targetEntries.get(i).getField());
-			
-			    }
-    	    }
-    			
-
+    			// split the leaf node
+    			ArrayList<LeafNode> splitNodes = splitLeafNode(e, target);
+    			// check the parent node before adding the splitted node to the parent
+    			// if the target node does not have a parent
+    			if(target.getParent()==null) {
+    				System.out.println(target.getParent());
+    				// transfer the target node to parent node 
+	    			InnerNode parent = new InnerNode(target.getDegree());
+		    			//copy the parent and children of target
+		    			parent.setParent(target.getParent());
+		    			// children might be unnecessary as the target is a leaf node
+		    			for(Node n: target.getChildren()) {
+		    				parent.setChildren(n);
+		    			}
+	    			// try to add the node to this newly created parent
+		    		for(LeafNode n : splitNodes) {
+		    			if(parent.isFull()) {
+		    				//split the parent
+		    				splitParentNode(parent);
+		    				// add nodes to the parents
+		    				// code needed here!!!!!!!!!
+		    			}else {
+		    				parent.setChildren(n);
+		    				// set keys here
+		    				//code needed!!!!!!
+		    			}
+		    		}
+    			}// bracket for target with no parent
+    			// if the target node has a parent
+    			else {
+    				InnerNode parent = (InnerNode) target.getParent();
+    				for(LeafNode n : splitNodes) {
+    					if(parent.isFull()) {
+		    				//split the parent
+		    				splitParentNode(parent);
+		    				// add nodes to the parents
+		    				// code needed here!!!!!!!!!
+		    			}else {
+		    				parent.setChildren(n);
+		    				// set keys here
+		    				//code needed!!!!!!
+		    			}
+    				}// for loop end
+    			}// bracket for target has a parent		
+    	    }	
     	}	
     }
     
-    public void splitLeafNode() {
-    	
+    public ArrayList<LeafNode> splitLeafNode(Entry e, LeafNode n) {
+    	ArrayList<Entry> oldEntires = n.getEntries();
+    	return null;
     }
     
-    public void splitParentNode() {
+    public void splitParentNode(Node n) {
     	
     }
     
