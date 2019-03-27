@@ -199,8 +199,46 @@ public class BPlusTree {
     	return lns;
     }
     
-    public void splitParentNode(Node n) {
+    public ArrayList<Node> splitParentNode(Node n) {
     	//Nana start here
+    	//original innernode
+    	InnerNode original = (InnerNode) n;
+    	//pInner or pInner - 1
+    	//split the original into two parts
+    	InnerNode split1 = new InnerNode(pInner);
+    	InnerNode split2 = new InnerNode(pInner);
+    	InnerNode parent = new InnerNode(pInner);
+    	int size = original.getKeys().size();
+    	// find each part has how many nodes after split
+    	if (size % 2 == 0) {
+    		for (int i = 0; i < size / 2 - 1; i++) {
+    			split1.addKeys(original.getKeys().get(i));
+    		}
+    		for (int i = size / 2; i < size; i++) {
+    			split2.addKeys(original.getKeys().get(i));
+    		}
+    		parent.addKeys(original.getKeys().get(size / 2 - 1));
+    	} else {
+    		for (int i = 0; i < size / 2; i++) {
+    			split1.addKeys(original.getKeys().get(i));
+    		}
+    		for (int i = size / 2 + 1; i < size; i++) {
+    			split2.addKeys(original.getKeys().get(i));
+    		}
+    		parent.addKeys(original.getKeys().get(size / 2));
+    	}
+    	split1.setParent(parent);
+    	split2.setParent(parent);
+    	parent.setChildren(split1);
+    	parent.setChildren(split2);
+    	//check whether the current innernode is root or not
+    	if (original.isRoot()) {
+    		root = parent;
+    	}
+    	ArrayList<Node> result = new ArrayList<>();
+    	result.add(split1);
+    	result.add(split2);
+    	return result;
     }
     
     public void splitRootNode() {
