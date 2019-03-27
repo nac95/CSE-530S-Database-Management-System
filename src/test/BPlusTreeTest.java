@@ -255,7 +255,7 @@ public class BPlusTreeTest {
 		ArrayList<Field> k = in.getKeys();
 		ArrayList<Node> c = in.getChildren();
 
-		assertTrue(k.get(0).compare(RelationalOperator.EQ, new IntField(6)));
+		assertTrue(k.get(0).compare(RelationalOperator.EQ, new IntField(7)));
 
 		//grab left and right children from root
 		InnerNode l = (InnerNode)c.get(0);
