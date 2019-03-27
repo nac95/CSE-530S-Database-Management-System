@@ -128,11 +128,11 @@ public class BPlusTree {
     		LeafNode target = this.searchTargetLeaf(e.getField(),this.root);
     		//add entry whatever the node
     		target.addKeys(e);
-    		
-    		//check if exceed one, if not exceed, do nothing
+       		//check if exceed one, if not exceed, do nothing
     		if(target.isExceedOne()) {
     			// split the leaf node
-    			ArrayList<LeafNode> splitNodes = splitLeafNode(target);
+    			splitLeafNode(target);
+    			/*
     			// if the target node does not have a parent
     			if(target.getParent()==null) {
     				System.out.println(target.getParent());
@@ -147,10 +147,10 @@ public class BPlusTree {
 	    			// try to add the keys of the new node
 		    		//Nana start here
 		    		
-		    		this.root = parent;
+		    		this.root = parent;*/
     			}// bracket for target with no parent
     			// if the target node has a parent
-    			else {
+    			/*else {
     				InnerNode parent = (InnerNode) target.getParent();
     				for(LeafNode n : splitNodes) {
     					parent.setChildren(n);
@@ -167,20 +167,17 @@ public class BPlusTree {
 		    				parent.addKeys(max);
 		    			}
     				}// for loop end
-    			}// bracket for target has a parent		
-    		}// if exceed one bracket
+    			}// bracket for target has a parent	
+    		}// if exceed one bracket*/
     	}	
     }
     
-    public ArrayList<LeafNode> splitLeafNode(LeafNode n) {
+    public void splitLeafNode(LeafNode n) {
     	ArrayList<Entry> entries = n.getEntries();
-    	ArrayList<LeafNode> lns = new ArrayList<>();
+    	//ArrayList<LeafNode> lns = new ArrayList<>();
     	// create nodes
     	LeafNode ln1 = new LeafNode(n.getDegree());
     	LeafNode ln2 = new LeafNode(n.getDegree());
-    	//set Parent
-    	ln1.setParent(n.getParent());
-    	ln2.setParent(n.getParent());
     	//set entries
     	if(entries.size()%2 == 0) {
     		for(int i = 0; i < entries.size()/2;i++) {
@@ -199,13 +196,35 @@ public class BPlusTree {
     			ln2.addKeys(entries.get(i));
     		}
     	}
-    	// add to list
-    	lns.add(ln1);
-    	lns.add(ln2);
-    	return lns;
+    	if (n.getParent() == null) {
+    		InnerNode parent = new InnerNode(pInner);
+    		if (entries.size() % 2 == 0) {
+    			parent.addKeys(entries.get(entries.size() / 2 - 1).getField());
+    		} else {
+    			parent.addKeys(entries.get(entries.size() / 2).getField());
+    		}
+    		parent.setChildren(ln1);
+    		parent.setChildren(ln2);
+    		ln1.setParent(parent);
+    		ln2.setParent(parent);
+    		if (n.isRoot()) {
+    			root = parent;
+    		}
+    	} else {
+    		InnerNode parent = (InnerNode)n.getParent();
+    		if (entries.size() % 2 == 0) {
+    			parent.addKeys(entries.get(entries.size() / 2 - 1).getField());
+    		} else {
+    			parent.addKeys(entries.get(entries.size() / 2).getField());
+    		}
+    		if (parent.isExceedOne()) {
+    			splitParentNode(parent);
+    		}
+    	}
+    	
     }
     
-    public ArrayList<Node> splitParentNode(Node n) {
+    public void splitParentNode(Node n) {
     	//Nana start here
     	//original innernode
     	InnerNode original = (InnerNode) n;
@@ -241,14 +260,6 @@ public class BPlusTree {
     	if (original.isRoot()) {
     		root = parent;
     	}
-    	ArrayList<Node> result = new ArrayList<>();
-    	result.add(split1);
-    	result.add(split2);
-    	return result;
-    }
-    
-    public void splitRootNode() {
-    	
     }
     
     public void delete(Entry e) {
