@@ -109,5 +109,15 @@ public class LeafNode implements Node {
 			entries.add(entry);
 		}
 	}
+	
+	public void removeEntry(Entry en) {
+		
+		try{
+			this.entries.remove(en);
+		}catch(Exception e) {
+			
+		}
+		
+	}
 
 }

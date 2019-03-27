@@ -104,5 +104,22 @@ public class InnerNode implements Node {
 			keys.add(key);
 		}
 	}
+	
+	public void removeChild(Node n) {
+		try{
+			this.children.remove(n);
+		}catch(Exception e) {
+			
+		}
+	}
+	
+	public void removeKey(Field f) {
+		try{
+			this.keys.remove(f);
+		}catch(Exception e) {
+			
+		}
+	}
+	
 
 }

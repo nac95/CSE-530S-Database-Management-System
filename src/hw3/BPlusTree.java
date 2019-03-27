@@ -264,6 +264,15 @@ public class BPlusTree {
     
     public void delete(Entry e) {
     	//your code here
+    	//if not in the tree, stay still
+    	if(search(e.getField())==null) {
+    		return;
+    	}
+    	LeafNode target = search(e.getField());
+    	int size = target.getEntries().size();
+    	if(size > target.getDegree()/2) {
+    		target.removeEntry(e);
+    	}
     }
     
     public Node getRoot() {
