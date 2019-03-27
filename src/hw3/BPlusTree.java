@@ -379,7 +379,12 @@ public class BPlusTree {
     	ArrayList<Entry> entries = target.getEntries();
     	ArrayList<Node> children = target.getParent().getChildren();
     	int index = children.indexOf(target);
-    	entries.remove(e);
+    	for (int i = 0; i < entries.size(); i++) {
+    		if (e.getField().compare(RelationalOperator.EQ, entries.get(i).getField())) {
+    			entries.remove(i);
+    		}
+    	}
+    	
     	if(entries.size() < target.getDegree() / 2) {
     		//check left node first
     		if (index == 0) {
@@ -429,6 +434,9 @@ public class BPlusTree {
     				if (lend.getField().compare(RelationalOperator.LT, ((InnerNode)target.getParent()).getKeys().get(index - 1))) {
     					((InnerNode)target.getParent()).getKeys().set(index - 1, lend.getField());
     				}
+    				if (lend.getField().compare(RelationalOperator.EQ, ((InnerNode)target.getParent()).getKeys().get(index - 1))) {
+    					((InnerNode)target.getParent()).getKeys().set(index - 1, ((LeafNode)children.get(index - 1)).getMaxKey());
+    				}
         		} else if (look((LeafNode)children.get(index + 1))) {
         				//look right and lend from right
         			Entry lend = ((LeafNode)children.get(index + 1)).getEntries().get(0);
@@ -438,6 +446,7 @@ public class BPlusTree {
     				if (lend.getField().compare(RelationalOperator.GT, ((InnerNode)target.getParent()).getKeys().get(index))) {
     					((InnerNode)target.getParent()).getKeys().set(index, lend.getField());
     				}
+    				
         		} else {
         			//merge to left
         			
