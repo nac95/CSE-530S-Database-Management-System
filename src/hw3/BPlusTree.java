@@ -169,9 +169,16 @@ public class BPlusTree {
     public ArrayList<LeafNode> splitLeafNode(LeafNode n) {
     	ArrayList<Entry> entries = n.getEntries();
     	ArrayList<LeafNode> lns = new ArrayList<>();
+    	// create nodes
+    	LeafNode ln1 = new LeafNode(n.getDegree());
+    	LeafNode ln2 = new LeafNode(n.getDegree());
+    	//set Parent
+    	ln1.setParent(n.getParent());
+    	ln2.setParent(n.getParent());
+    	//set entries
     	if(entries.size()%2 == 0) {
     		for(int i = 0; i < entries.size()/2;i++) {
-    			
+    			ln1.addKeys(entries.get(i));
     		}
     	}
     	return null;
