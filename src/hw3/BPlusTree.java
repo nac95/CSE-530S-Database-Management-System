@@ -35,6 +35,7 @@ public class BPlusTree {
     	
     	if(n.isLeafNode()) {
     		System.out.println("Node is leaf"+n.toString());
+    		//correct the search
     		return (LeafNode) n;
     	}
     	else{
@@ -137,33 +138,22 @@ public class BPlusTree {
 		    			for(Node n: target.getChildren()) {
 		    				parent.setChildren(n);
 		    			}
-	    			// try to add the node to this newly created parent
+	    			// try to add the keys of the new node
+		    		//Nana start here
 		    		
-		    			
-		    			
-		    			
-		    			
-		    		for(LeafNode n : splitNodes) {
-		    			if(parent.isExceedOne()) {
-		    				//split the parent
-		    				splitParentNode(parent);
-		    				// add nodes to the parents
-		    				// code needed here!!!!!!!!!
-		    			}else {
-		    				parent.setChildren(n);
-		    				Field max = n.getMaxKey();
-		    				parent.addKeys(max);
-		    			}
-		    		}
+		    		this.root = parent;
     			}// bracket for target with no parent
     			// if the target node has a parent
     			else {
     				InnerNode parent = (InnerNode) target.getParent();
     				for(LeafNode n : splitNodes) {
+    					parent.setChildren(n);
     					if(parent.isExceedOne()) {
 		    				//split the parent
 		    				splitParentNode(parent);
-		    				// add nodes to the parents
+		    				// add child nodes to the parents
+		    				// ????
+		    				n.setParent(parent);
 		    				// code needed here!!!!!!!!!
 		    			}else {
 		    				parent.setChildren(n);
@@ -177,7 +167,13 @@ public class BPlusTree {
     }
     
     public ArrayList<LeafNode> splitLeafNode(LeafNode n) {
-    	
+    	ArrayList<Entry> entries = n.getEntries();
+    	ArrayList<LeafNode> lns = new ArrayList<>();
+    	if(entries.size()%2 == 0) {
+    		for(int i = 0; i < entries.size()/2;i++) {
+    			
+    		}
+    	}
     	return null;
     }
     

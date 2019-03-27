@@ -21,8 +21,8 @@ public class InnerNode implements Node {
 		this.isRoot = false;
 	}
 	
-	public void setRoot() {
-		this.isRoot = true;
+	public void setRoot(boolean b) {
+		this.isRoot = b;
 	}
 	
 	public boolean isRoot(){

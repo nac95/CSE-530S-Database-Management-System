@@ -13,10 +13,12 @@ public class LeafNode implements Node {
 	private int degree;
 	private ArrayList<Entry> entries = new ArrayList<>();
 	private Node parent;
+	private boolean root;
 	
 	public LeafNode(int degree) {
 		//your code here
 		this.degree = degree;
+		this.root = false;
 	}
 	
 	public ArrayList<Entry> getEntries() {
@@ -33,6 +35,10 @@ public class LeafNode implements Node {
 		return true;
 	}
 	
+	public boolean isRoot() {
+		return this.root;
+	}
+	
 	public boolean isExceedOne() {
 		// may not be right
 		if(this.degree + 1 == this.entries.size()) {
@@ -44,6 +50,10 @@ public class LeafNode implements Node {
 	
 	public Node getParent() {
 		return this.parent;
+	}
+	
+	public void setRoot(boolean b) {
+		this.root = b;
 	}
 	
 	public void setParent(Node parent) {
