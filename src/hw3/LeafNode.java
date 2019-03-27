@@ -41,7 +41,7 @@ public class LeafNode implements Node {
 	
 	public boolean isExceedOne() {
 		// may not be right
-		if(this.degree + 1 == this.entries.size()) {
+		if(this.degree < this.entries.size()) {
 			return true;
 		}else {
 			return false;
@@ -68,7 +68,7 @@ public class LeafNode implements Node {
 		System.out.println("default max"+max);
 		for(Entry ne: this.entries) {
 			Field f = ne.getField();
-			if(f.compare(RelationalOperator.GTE, max)||max == null) {
+			if(max == null || f.compare(RelationalOperator.GTE, max)) {
 				max = f;
 			}
 		}
@@ -79,17 +79,19 @@ public class LeafNode implements Node {
 	public void addKeys(Entry entry) {
 		if (entries.size() == 0) {
 			entries.add(entry);
+			return; 
 		}
 		boolean add = false;
 		if (entry.getField().getType() == Type.INT) {
-			byte[] newEntryByte = entry.getField().toByteArray();
-			int newEntry = new IntField(newEntryByte).getValue();
+//			byte[] newEntryByte = entry.getField().toByteArray();
+//			int newEntry = new IntField(newEntryByte).getValue();
 			for (int i = 0; i < entries.size(); i++) {
-				byte[] oldEntryByte = entries.get(i).getField().toByteArray();
-				int oldEntry = new IntField(oldEntryByte).getValue();
-				if (newEntry < oldEntry) {
+//				byte[] oldEntryByte = entries.get(i).getField().toByteArray();
+//				int oldEntry = new IntField(oldEntryByte).getValue();
+				if (entry.getField().compare(RelationalOperator.LT, entries.get(i).getField())) {
 					entries.add(i, entry);
 					add = true;
+					break;
 				}
 			}
 		}
@@ -102,6 +104,7 @@ public class LeafNode implements Node {
 				if (newEntry.compareTo(oldEntry) < 0) {
 					entries.add(i, entry);
 					add = true;
+					break;
 				}
 			}
 		}

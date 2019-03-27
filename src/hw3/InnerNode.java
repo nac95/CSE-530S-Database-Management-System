@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import hw1.Field;
 import hw1.IntField;
+import hw1.RelationalOperator;
 import hw1.StringField;
 import hw1.Type;
 
@@ -65,7 +66,7 @@ public class InnerNode implements Node {
 	
 	public boolean isExceedOne() {
 		// cannot have more sub tree
-		if (this.degree == this.keys.size()) {
+		if (this.degree - 1 < this.keys.size()) {
 			return true;
 		}
 		return false;
@@ -74,20 +75,25 @@ public class InnerNode implements Node {
 	public void addKeys(Field key) {
 		if (keys.size() == 0) {
 			keys.add(key);
+			return;
 		}
 		boolean add = false;
 		if (key.getType() == Type.INT) {
-			byte[] newKeyByte = key.toByteArray();
-			int newKey = new IntField(newKeyByte).getValue();
+			//byte[] newKeyByte = key.toByteArray();
+			//int newKey = new IntField(newKeyByte).getValue();
 			for (int i = 0; i < keys.size(); i++) {
-				byte[] oldKeyByte = keys.get(i).toByteArray();
-				int oldKey = new IntField(oldKeyByte).getValue();
-				if (newKey < oldKey) {
+				//byte[] oldKeyByte = keys.get(i).toByteArray();
+				//int oldKey = new IntField(oldKeyByte).getValue();
+				if (key.compare(RelationalOperator.LT, keys.get(i))) {
 					keys.add(i, key);
 					add = true;
+					break;
 				}
 			}
 		}
+		
+		
+		
 		if (key.getType() == Type.STRING) {
 			byte[] newKeyByte = key.toByteArray();
 			String newKey = new StringField(newKeyByte).getValue();
@@ -97,6 +103,7 @@ public class InnerNode implements Node {
 				if (newKey.compareTo(oldKey) < 0) {
 					keys.add(i, key);
 					add = true;
+					break;
 				}
 			}
 		}
@@ -121,5 +128,17 @@ public class InnerNode implements Node {
 		}
 	}
 	
+	public Field getMaxKey() {
+		Field max = null;
+		System.out.println("default max"+max);
+		for(Field f: this.keys) {
+			
+			if(max == null || f.compare(RelationalOperator.GTE, max)) {
+				max = f;
+			}
+		}
+		System.out.println("max"+max);
+		return max;
+	}
 
 }

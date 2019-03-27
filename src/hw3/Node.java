@@ -2,6 +2,8 @@ package hw3;
 
 import java.util.ArrayList;
 
+import hw1.Field;
+
 public interface Node {
 	
 	
@@ -11,4 +13,5 @@ public interface Node {
 	public boolean isRoot();
 	public void setParent(Node parent);
 	public ArrayList<Node> getChildren();
+	public Field getMaxKey();
 }
