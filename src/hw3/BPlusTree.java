@@ -398,7 +398,15 @@ public class BPlusTree {
     					((InnerNode)target.getParent()).getKeys().set(0, lend.getField());
     				}
     			} else {
-    				//ortherwise merge
+    				//otherwise merge
+					InnerNode parent = target.getParent();
+					parent.getKeys.remove(0);
+					parent.getChildren.remove(0);
+				    if(parent.getKeys().size() < parent.getDegree()/2){
+						parentLend();
+					}else{
+						// do nothing
+					}
     				
     				
     			}
