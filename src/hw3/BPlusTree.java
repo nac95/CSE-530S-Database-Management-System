@@ -379,6 +379,7 @@ public class BPlusTree {
     	ArrayList<Entry> entries = target.getEntries();
     	ArrayList<Node> children = target.getParent().getChildren();
     	int index = children.indexOf(target);
+    	int sizePar = ((InnerNode)target.getParent()).getKeys().size();
     	for (int i = 0; i < entries.size(); i++) {
     		if (e.getField().compare(RelationalOperator.EQ, entries.get(i).getField())) {
     			entries.remove(i);
@@ -410,7 +411,7 @@ public class BPlusTree {
     				Entry lend = ((LeafNode)children.get(index - 1)).getEntries().get(size - 1);
     				entries.add(lend);
     				((LeafNode)children.get(index - 1)).getEntries().remove(size - 1);
-    				int sizePar = ((InnerNode)target.getParent()).getKeys().size();
+    				//int sizePar = ((InnerNode)target.getParent()).getKeys().size();
     				if (lend.getField().compare(RelationalOperator.LT, ((InnerNode)target.getParent()).getKeys().get(sizePar - 1))) {
     					((InnerNode)target.getParent()).getKeys().set(sizePar - 1, lend.getField());
     				}
@@ -420,7 +421,10 @@ public class BPlusTree {
     				
     			} else {
     				//ortherwise merge
-    				
+    				if (entries.size() == 0) {
+        				children.remove(index);
+        				((InnerNode)target.getParent()).getKeys().remove(sizePar - 1);
+        			}
     			}
     		}
     		if (index > 0 && index < children.size() - 1) {
@@ -430,7 +434,7 @@ public class BPlusTree {
     				Entry lend = ((LeafNode)children.get(index - 1)).getEntries().get(size - 1);
     				entries.add(lend);
     				((LeafNode)children.get(index - 1)).getEntries().remove(size - 1);
-    				int sizePar = ((InnerNode)target.getParent()).getKeys().size();
+    				//int sizePar = ((InnerNode)target.getParent()).getKeys().size();
     				if (lend.getField().compare(RelationalOperator.LT, ((InnerNode)target.getParent()).getKeys().get(index - 1))) {
     					((InnerNode)target.getParent()).getKeys().set(index - 1, lend.getField());
     				}
@@ -442,14 +446,18 @@ public class BPlusTree {
         			Entry lend = ((LeafNode)children.get(index + 1)).getEntries().get(0);
     				entries.add(lend);
     				((LeafNode)children.get(index + 1)).getEntries().remove(0);
-    				int sizePar = ((InnerNode)target.getParent()).getKeys().size();
+    				//int sizePar = ((InnerNode)target.getParent()).getKeys().size();
     				if (lend.getField().compare(RelationalOperator.GT, ((InnerNode)target.getParent()).getKeys().get(index))) {
     					((InnerNode)target.getParent()).getKeys().set(index, lend.getField());
     				}
     				
         		} else {
         			//merge to left
-        			
+        			//int sizePar = ((InnerNode)target.getParent()).getKeys().size();
+        			if (entries.size() == 0) {
+        				children.remove(index);
+        				((InnerNode)target.getParent()).getKeys().remove(sizePar - 1);
+        			}
         		}
     		}
     		
