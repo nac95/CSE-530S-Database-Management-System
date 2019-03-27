@@ -36,7 +36,13 @@ public class BPlusTree {
     	if(n.isLeafNode()) {
     		System.out.println("Node is leaf"+n.toString());
     		//correct the search
-    		return (LeafNode) n;
+    		LeafNode leafN = (LeafNode) n;
+    		for(Entry e:leafN.getEntries()) {
+    			if(e.getField().equals(f)) {
+    				return (LeafNode) n;
+    			}
+    		}
+    		return null;
     	}
     	else{
     		InnerNode inner =  (InnerNode) n;
