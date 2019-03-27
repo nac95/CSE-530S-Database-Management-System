@@ -234,18 +234,20 @@ public class BPlusTree {
     		} else {
     			parent.addKeys(entries.get(entries.size() / 2).getField());
     		}
-    		if (parent.isExceedOne()) {
-    			splitParentNode(parent, change);
-    		}
     		children.add(change, ln1);
     		children.add(change + 1, ln2);
     		ln1.setParent(parent);
     		ln2.setParent(parent);
+    		if (parent.isExceedOne()) {
+    			splitParentNode(parent);
+    			//splitParentNode(ln1, ln2, parent);
+    			
+    		}
     	}
     	
     }
     
-    public void splitParentNode(Node n, int change) {
+    public void splitParentNode(Node n) {
     	//Nana start here
     	//original innernode
     	InnerNode original = (InnerNode) n;
@@ -255,35 +257,131 @@ public class BPlusTree {
         	InnerNode split2 = new InnerNode(pInner);
         	InnerNode parent = new InnerNode(pInner);
         	int size = original.getKeys().size();
+        	ArrayList<Node> children = original.getChildren();
         	// find each part has how many nodes after split
         	if (size % 2 == 0) {
-        		for (int i = 0; i < size / 2 - 1; i++) {
+        		for (int i = 0; i < size / 2; i++) {
         			split1.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
+        					split1.setChildren(child);
+        					child.setParent(split1);
+        					children.remove(child);
+        				}
+        			}
         		}
         		for (int i = size / 2; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				split2.setChildren(child);
+        				child.setParent(split2);
+        				children.remove(child);
+        			}
         		}
+        		split1.getKeys().remove(original.getKeys().get(size / 2 - 1));
         		parent.addKeys(original.getKeys().get(size / 2 - 1));
         	} else {
-        		for (int i = 0; i < size / 2; i++) {
+        		for (int i = 0; i < size / 2 + 1; i++) {
         			split1.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
+        					split1.setChildren(child);
+        					child.setParent(split1);
+        					children.remove(child);
+        				}
+        			}
         		}
         		for (int i = size / 2 + 1; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				split2.setChildren(child);
+        				child.setParent(split2);
+        				children.remove(child);
+        			}
         		}
+        		split1.getKeys().remove(original.getKeys().get(size / 2));
         		parent.addKeys(original.getKeys().get(size / 2));
         	}
         	split1.setParent(parent);
         	split2.setParent(parent);
         	parent.setChildren(split1);
         	parent.setChildren(split2);
+        
         	//check whether the current innernode is root or not
         	if (root == original) {
         		root = parent;
         	}
     		
     	} else {
-    		
+    		//split the original into two parts
+        	InnerNode split1 = new InnerNode(pInner);
+        	InnerNode split2 = new InnerNode(pInner);
+        	InnerNode parent = original.getParent();
+        	int size = original.getKeys().size();
+        	ArrayList<Node> children = original.getChildren();
+        	// find each part has how many nodes after split
+        	if (size % 2 == 0) {
+        		for (int i = 0; i < size / 2; i++) {
+        			split1.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
+        					split1.setChildren(child);
+        					child.setParent(split1);
+        					children.remove(child);
+        				}
+        			}
+        		}
+        		for (int i = size / 2; i < size; i++) {
+        			split2.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        			//	System.out.println("maxkey in 343" + child.getMaxKey().toString());
+        				split2.setChildren(child);
+        				child.setParent(split2);
+        				children.remove(child);
+        			}
+        		}
+        		split1.getKeys().remove(original.getKeys().get(size / 2 - 1));
+        		parent.addKeys(original.getKeys().get(size / 2 - 1));
+        		if (parent.isExceedOne()) {
+        			splitParentNode(parent);
+        		}
+        	} else {
+        		for (int i = 0; i < size / 2 + 1; i++) {
+        			split1.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
+        					split1.setChildren(child);
+        					child.setParent(split1);
+        					children.remove(child);
+        				}
+        			}
+        		}
+        		for (int i = size / 2 + 1; i < size; i++) {
+        			split2.addKeys(original.getKeys().get(i));
+        			for (int j = 0; j < children.size(); j++) {
+        				Node child = children.get(j);
+        				split2.setChildren(child);
+        				child.setParent(split2);
+        				children.remove(child);
+        			}
+        		}
+        		split1.getKeys().remove(original.getKeys().get(size / 2));
+        		parent.addKeys(original.getKeys().get(size / 2));
+        		if (parent.isExceedOne()) {
+        			splitParentNode(parent);
+        		}
+        	}
+        	split1.setParent(parent);
+        	split2.setParent(parent);
+        	parent.setChildren(split1);
+        	parent.setChildren(split2);
     		
     	}
     	
