@@ -407,15 +407,18 @@ public class BPlusTree {
     				for (int i = 0; i < entries.size(); i++) {
     					((LeafNode)children.get(index)).addKeys(entries.get(i));
     				}
-    				if(parent.getKeys().size() < parent.getDegree()/2){
-    		//			parentLend(parent);
+    				if(root != parent && parent.getKeys().size() < ((parent.getDegree() - 1) % 2 == 0 ? (parent.getDegree() - 1) / 2 : (parent.getDegree() - 1) / 2 + 1)){
+    					parentLend(parent);
     				}
-    				
+    				if (root == parent && parent.getKeys().size() == 0) {
+    					root = parent.getChildren().get(0);
+    					return;
+    				}
 					
     			}
     			
     		}
-    		if (index == children.size() - 1) {
+    		else if (index == children.size() - 1) {
     			if (look((LeafNode)children.get(index - 1))) {
     				//lend one from left
     				int size = ((LeafNode)children.get(index - 1)).getEntries().size();
@@ -435,19 +438,23 @@ public class BPlusTree {
 
     				children.remove(index);
     				InnerNode parent = (InnerNode)target.getParent();
-    				parent.getKeys().remove(sizePar - 1);
+    				parent.getKeys().remove(index - 1);
     				for (int i = 0; i < entries.size(); i++) {
     					((LeafNode)children.get(index - 1)).addKeys(entries.get(i));
     					
     				}
-    				if(parent.getKeys().size() < parent.getDegree()/2){
-    		//			parentLend(parent);
+    				if(root != parent && parent.getKeys().size() < ((parent.getDegree() - 1) % 2 == 0 ? (parent.getDegree() - 1) / 2 : (parent.getDegree() - 1) / 2 + 1)){
+    					parentLend(parent);
     				}
-    				
+    				if (root == parent && parent.getKeys().size() == 0) {
+    					root = parent.getChildren().get(0);
+    					parent.getChildren().get(0).setParent(null);
+    					return;
+    				}
         			
     			}
     		}
-    		if (index > 0 && index < children.size() - 1) {
+    		else if (index > 0 && index < children.size() - 1) {
     			if (look((LeafNode)children.get(index - 1))) {
         			//lend one from left
     				int size = ((LeafNode)children.get(index - 1)).getEntries().size();
@@ -481,8 +488,12 @@ public class BPlusTree {
     					((LeafNode)children.get(index - 1)).addKeys(entries.get(i));
     					
     				}
-    				if(parent.getKeys().size() < parent.getDegree()/2){
-    		//			parentLend(parent);
+    				if(root != parent && parent.getKeys().size() < ((parent.getDegree() - 1) % 2 == 0 ? (parent.getDegree() - 1) / 2 : (parent.getDegree() - 1) / 2 + 1)){
+    					parentLend(parent);
+    				}
+    				if (root == parent && parent.getKeys().size() == 0) {
+    					root = parent.getChildren().get(0);
+    					return;
     				}
         		}
     		}
@@ -497,6 +508,154 @@ public class BPlusTree {
     	return true;
     }
     
+    private boolean look(InnerNode target) {
+
+    	if ((target.getKeys().size() - 1) < ((target.getDegree() - 1) % 2 == 0 ? (target.getDegree() - 1) / 2 : target.getDegree() / 2 + 1)) {
+    		return false;
+    	}
+    	return true;
+    }
+    
+    
+    private void parentLend(InnerNode parent) {
+    	ArrayList<Field> keys = parent.getKeys();
+    	ArrayList<Node> children = parent.getParent().getChildren();
+    	int index = children.indexOf(parent);
+    	int sizePar = ((InnerNode)parent.getParent()).getKeys().size();
+    	
+    	
+    	
+    	//check left node first
+		if (index == 0) {
+			if (look((InnerNode)children.get(index + 1))) {
+				//lend one from right
+				Field lend = parent.getParent().getKeys().get(0);
+				Field up = ((InnerNode)children.get(index + 1)).getKeys().get(0);
+				parent.getParent().addKeys(up);
+				parent.addKeys(lend);
+				parent.getParent().getKeys().remove(lend);
+				((InnerNode)children.get(index + 1)).getKeys().remove(0);
+				ArrayList<Node> childrenFromNeighbor = ((InnerNode)children.get(index + 1)).getChildren();
+				parent.getChildren().add(childrenFromNeighbor.get(0));
+				childrenFromNeighbor.remove(0);
+				
+			} 
+			else {
+				
+				//ortherwise merge
+
+				children.remove(index);
+				InnerNode par = (InnerNode)parent.getParent();
+				for (int i = 0; i < keys.size(); i++) {
+					((InnerNode)par.getChildren().get(0)).addKeys(keys.get(i));
+				}
+				par.getKeys().remove(0);
+				for (int i = 0; i < parent.getChildren().size(); i++) {
+					((InnerNode)par.getChildren().get(0)).getChildren().add(parent.getChildren().get(i));
+				}
+				
+				
+				if(par.getKeys().size() < ((par.getDegree() - 1) % 2 == 0 ? par.getDegree() / 2 : (par.getDegree() - 1) / 2 + 1)){
+					parentLend(parent);
+				}
+			}
+			
+		}
+		
+		else if (index == children.size() - 1) {
+			
+
+			if (look((InnerNode)children.get(index - 1))) {
+				//lend one from left
+				Field lend = parent.getParent().getKeys().get(sizePar - 1);
+				int neighborSize = ((InnerNode)children.get(index - 1)).getKeys().size();
+				Field up = ((InnerNode)children.get(index - 1)).getKeys().get(neighborSize - 1);
+				parent.getParent().addKeys(up);
+				parent.addKeys(lend);
+				parent.getParent().getKeys().remove(lend);
+				((InnerNode)children.get(index - 1)).getKeys().remove(neighborSize - 1);
+				ArrayList<Node> childrenFromNeighbor = ((InnerNode)children.get(index - 1)).getChildren();
+				parent.getChildren().add(0, childrenFromNeighbor.get(childrenFromNeighbor.size() - 1));
+				childrenFromNeighbor.remove(childrenFromNeighbor.size() - 1);
+			} 
+			else {
+				//ortherwise merge
+
+				children.remove(index);
+				InnerNode par = (InnerNode)parent.getParent();
+				for (int i = 0; i < parent.getChildren().size(); i++) {
+					((InnerNode)par.getChildren().get(index - 1)).getChildren().add(parent.getChildren().get(i));
+				}
+				if (par.getKeys().size() == 1 && par.getChildren().size() == 1) {
+					((InnerNode)par.getChildren().get(0)).addKeys(par.getKeys().get(0));
+					root = par.getChildren().get(0);
+					par.getChildren().get(0).setParent(null);
+					return;
+				}
+				par.getKeys().remove(index - 1);
+				for (int i = 0; i < parent.getChildren().size(); i++) {
+					((InnerNode)par.getChildren().get(index - 1)).getChildren().add(parent.getChildren().get(i));
+				}
+				
+				if(par.getKeys().size() < ((par.getDegree() - 1) % 2 == 0 ? (par.getDegree() - 1) / 2 : par.getDegree() / 2 + 1)){
+					parentLend(parent);
+				}
+				
+    			
+			}
+		}
+		
+		else if (index > 0 && index < children.size() - 1) {
+				
+			if (look((InnerNode)children.get(index - 1))) {
+				//lend one from left
+				Field lend = parent.getParent().getKeys().get(index - 1);
+				int neighborSize = ((InnerNode)children.get(index - 1)).getKeys().size();
+				Field up = ((InnerNode)children.get(index - 1)).getKeys().get(neighborSize - 1);
+				parent.getParent().addKeys(up);
+				parent.addKeys(lend);
+				parent.getParent().getKeys().remove(lend);
+				((InnerNode)children.get(index - 1)).getKeys().remove(neighborSize - 1);
+				ArrayList<Node> childrenFromNeighbor = ((InnerNode)children.get(index - 1)).getChildren();
+				parent.getChildren().add(0, childrenFromNeighbor.get(childrenFromNeighbor.size() - 1));
+				childrenFromNeighbor.remove(childrenFromNeighbor.size() - 1);
+			} else if (look((InnerNode)children.get(index + 1))) {
+				//lend one from right
+				Field lend = parent.getParent().getKeys().get(index + 1);
+				Field up = ((InnerNode)children.get(index + 1)).getKeys().get(0);
+				parent.getParent().addKeys(up);
+				parent.addKeys(lend);
+				parent.getParent().getKeys().remove(lend);
+				((InnerNode)children.get(index + 1)).getKeys().remove(0);
+				ArrayList<Node> childrenFromNeighbor = ((InnerNode)children.get(index + 1)).getChildren();
+				parent.getChildren().add(childrenFromNeighbor.get(0));
+				childrenFromNeighbor.remove(0);
+				
+			}
+			else {
+				//ortherwise merge
+
+				children.remove(index);
+				InnerNode par = (InnerNode)parent.getParent();
+				for (int i = 0; i < keys.size(); i++) {
+					((InnerNode)par.getChildren().get(index - 1)).addKeys(keys.get(i));
+				}
+				par.getKeys().remove(index - 1);
+				for (int i = 0; i < parent.getChildren().size(); i++) {
+					((InnerNode)par.getChildren().get(index - 1)).getChildren().add(parent.getChildren().get(i));
+				}
+				
+				
+				if(par.getKeys().size() < ((par.getDegree() - 1) % 2 == 0 ? par.getDegree() / 2 : (par.getDegree() - 1) / 2 + 1)){
+					parentLend(parent);
+				}
+				
+    			
+			}
+			
+		}
+		
+    }
     
     public Node getRoot() {
     	//your code here
