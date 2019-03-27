@@ -258,51 +258,58 @@ public class BPlusTree {
         	InnerNode parent = new InnerNode(pInner);
         	int size = original.getKeys().size();
         	ArrayList<Node> children = original.getChildren();
+        	int secStart = 0;
         	// find each part has how many nodes after split
         	if (size % 2 == 0) {
         		for (int i = 0; i < size / 2; i++) {
         			split1.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
-        					split1.setChildren(child);
-        					child.setParent(split1);
-        					children.remove(child);
-        				}
-        			}
+      
         		}
+        		for (int j = 0; j < children.size(); j++) {
+    				Node child = children.get(j);
+    				if (child.getMaxKey().compare(RelationalOperator.LTE, split1.getMaxKey())) {
+    					split1.setChildren(child);
+    					child.setParent(split1);
+    					secStart++;
+    				}
+    			}
         		for (int i = size / 2; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				split2.setChildren(child);
-        				child.setParent(split2);
-        				children.remove(child);
-        			}
+        			
         		}
+        		for (int j = secStart; j < children.size(); j++) {
+    				Node child = children.get(j);
+    			
+    				split2.setChildren(child);
+    				child.setParent(split2);
+    				
+    			}
         		split1.getKeys().remove(original.getKeys().get(size / 2 - 1));
         		parent.addKeys(original.getKeys().get(size / 2 - 1));
         	} else {
         		for (int i = 0; i < size / 2 + 1; i++) {
         			split1.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
-        					split1.setChildren(child);
-        					child.setParent(split1);
-        					children.remove(child);
-        				}
-        			}
+        			
         		}
+        		for (int j = 0; j < children.size(); j++) {
+    				Node child = children.get(j);
+    				if (child.getMaxKey().compare(RelationalOperator.LTE, split1.getMaxKey())) {
+    					split1.setChildren(child);
+    					child.setParent(split1);
+    					secStart++;
+    				}
+    			}
         		for (int i = size / 2 + 1; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				split2.setChildren(child);
-        				child.setParent(split2);
-        				children.remove(child);
-        			}
+        			
         		}
+        		for (int j = secStart; j < children.size(); j++) {
+    				Node child = children.get(j);
+    			
+    				split2.setChildren(child);
+    				child.setParent(split2);
+    				
+    			}
         		split1.getKeys().remove(original.getKeys().get(size / 2));
         		parent.addKeys(original.getKeys().get(size / 2));
         	}
@@ -323,29 +330,33 @@ public class BPlusTree {
         	InnerNode parent = original.getParent();
         	int size = original.getKeys().size();
         	ArrayList<Node> children = original.getChildren();
+       //	System.out.println("!!!!!!!!!!!!size in 326" + children.size());
+        	int secStart = 0;
         	// find each part has how many nodes after split
         	if (size % 2 == 0) {
         		for (int i = 0; i < size / 2; i++) {
         			split1.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
-        					split1.setChildren(child);
-        					child.setParent(split1);
-        					children.remove(child);
-        				}
-        			}
+        			
         		}
+        		for (int j = 0; j < children.size(); j++) {
+    				Node child = children.get(j);
+    				if (child.getMaxKey().compare(RelationalOperator.LTE, split1.getMaxKey())) {
+    					split1.setChildren(child);
+    					child.setParent(split1);
+    					secStart++;
+    				}
+    			}
         		for (int i = size / 2; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        			//	System.out.println("maxkey in 343" + child.getMaxKey().toString());
-        				split2.setChildren(child);
-        				child.setParent(split2);
-        				children.remove(child);
-        			}
+        			
         		}
+        		for (int j = secStart; j < children.size(); j++) {
+    				Node child = children.get(j);
+    			
+    				split2.setChildren(child);
+    				child.setParent(split2);
+    				
+    			}
         		split1.getKeys().remove(original.getKeys().get(size / 2 - 1));
         		parent.addKeys(original.getKeys().get(size / 2 - 1));
         		if (parent.isExceedOne()) {
@@ -354,24 +365,26 @@ public class BPlusTree {
         	} else {
         		for (int i = 0; i < size / 2 + 1; i++) {
         			split1.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				if (child.getMaxKey().compare(RelationalOperator.LTE, original.getKeys().get(i))) {
-        					split1.setChildren(child);
-        					child.setParent(split1);
-        					children.remove(child);
-        				}
-        			}
+        			
         		}
+        		for (int j = 0; j < children.size(); j++) {
+    				Node child = children.get(j);
+    				if (child.getMaxKey().compare(RelationalOperator.LTE, split1.getMaxKey())) {
+    					split1.setChildren(child);
+    					child.setParent(split1);
+    					secStart++;
+    				}
+    			}
         		for (int i = size / 2 + 1; i < size; i++) {
         			split2.addKeys(original.getKeys().get(i));
-        			for (int j = 0; j < children.size(); j++) {
-        				Node child = children.get(j);
-        				split2.setChildren(child);
-        				child.setParent(split2);
-        				children.remove(child);
-        			}
+        			
         		}
+        		for (int j = secStart; j < children.size(); j++) {
+    				Node child = children.get(j);
+    				split2.setChildren(child);
+    				child.setParent(split2);
+    				
+    			}
         		split1.getKeys().remove(original.getKeys().get(size / 2));
         		parent.addKeys(original.getKeys().get(size / 2));
         		if (parent.isExceedOne()) {
