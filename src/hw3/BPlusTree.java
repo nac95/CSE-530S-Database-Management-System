@@ -180,8 +180,23 @@ public class BPlusTree {
     		for(int i = 0; i < entries.size()/2;i++) {
     			ln1.addKeys(entries.get(i));
     		}
+    		for(int i = entries.size()/2; i < entries.size();i++) {
+    			ln2.addKeys(entries.get(i));
+    		}
     	}
-    	return null;
+    	else {
+    		int half = entries.size()/2 + 1;
+    		for(int i = 0; i < half;i++) {
+    			ln1.addKeys(entries.get(i));
+    		}
+    		for(int i = half; i < entries.size();i++) {
+    			ln2.addKeys(entries.get(i));
+    		}
+    	}
+    	// add to list
+    	lns.add(ln1);
+    	lns.add(ln2);
+    	return lns;
     }
     
     public void splitParentNode(Node n) {
