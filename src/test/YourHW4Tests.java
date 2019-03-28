@@ -53,31 +53,36 @@ public class YourHW4Tests {
 	}
 
 	@Test
-	public void test() {
-		fail("Not yet implemented");
-	}
-	@Test
-	public void testCommit() throws Exception {
+	public void testUpdateReadToWrite() throws Exception {
 		Tuple t = new Tuple(td);
 		t.setField(0, new IntField(new byte[] {0, 0, 0, (byte)131}));
 		byte[] s = new byte[129];
-		s[0] = 2;
-		s[1] = 98;
+		s[0] = 6;
+		s[1] = 88;
 		s[2] = 121;
 		t.setField(1, new StringField(s));
 		
+		//start with read access only
+		bp.getPage(0, tid, 0, Permissions.READ_ONLY); //acquire lock for the page
+		bp.insertTuple(0, tid, t); //insert the tuple into the page
+		bp.transactionComplete(0, false); //should not flush the modified page
+		HeapPage hp0 = bp.getPage(1, tid, 0, Permissions.READ_ONLY);
+		Iterator<Tuple> it0 = hp0.iterator();
+		assertFalse(it0.hasNext());
+		
+		//update to read and write
 		bp.getPage(0, tid, 0, Permissions.READ_WRITE); //acquire lock for the page
 		bp.insertTuple(0, tid, t); //insert the tuple into the page
 		bp.transactionComplete(0, true); //should flush the modified page
 		
 		//reset the buffer pool, get the page again, make sure data is there
 		Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
-		HeapPage hp = bp.getPage(1, tid, 0, Permissions.READ_ONLY);
-		Iterator<Tuple> it = hp.iterator();
-		assertTrue(it.hasNext());
-		it.next();
-		assertTrue(it.hasNext());
-		it.next();
-		assertFalse(it.hasNext());
+		HeapPage hp1 = bp.getPage(1, tid, 0, Permissions.READ_ONLY);
+		Iterator<Tuple> it1 = hp1.iterator();
+		assertTrue(it1.hasNext());
+		it1.next();
+		assertTrue(it1.hasNext());
+		it1.next();
+		assertFalse(it1.hasNext());
 	}
 }
