@@ -85,4 +85,50 @@ public class YourHW4Tests {
 		it1.next();
 		assertFalse(it1.hasNext());
 	}
+	
+	@Test
+	public void testDeleteTuple() throws Exception {
+		//initialize the tuple that i want to insert
+		Tuple t = new Tuple(td);
+		t.setField(0, new IntField(new byte[] {0, 0, 0, (byte)131}));
+		byte[] s = new byte[129];
+		s[0] = 6;
+		s[1] = 88;
+		s[2] = 121;
+		t.setField(1, new StringField(s));
+		
+		bp.getPage(0, tid, 0, Permissions.READ_WRITE); //acquire lock for the page
+		bp.insertTuple(0, tid, t); //insert the tuple into the page
+		bp.transactionComplete(0, true); //should flush the modified page
+		
+		//reset the buffer pool, get the page again, make sure data is there
+		Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+		HeapPage hp = bp.getPage(1, tid, 0, Permissions.READ_ONLY);
+		Iterator<Tuple> it = hp.iterator();
+		assertTrue(it.hasNext());
+		it.next();
+		assertTrue(it.hasNext());
+		it.next();
+		assertFalse(it.hasNext());
+		//until here, successfully insert
+		
+		bp.getPage(0, tid, 0, Permissions.READ_WRITE); //acquire lock for the page
+		bp.deleteTuple(0, tid, t); //delete the tuple into the page
+		bp.transactionComplete(0, true); //should flush the modified page
+		
+		//reset the buffer pool, get the page again, make sure data has been deleted successfully
+		Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
+		HeapPage hp2 = bp.getPage(1, tid, 0, Permissions.READ_ONLY);
+		Iterator<Tuple> it2 = hp2.iterator();
+		assertTrue(it2.hasNext());
+		it2.next();
+		assertFalse(it2.hasNext());
+		//until here, delete successfully
+		
+	}
+	
+	
+	
+	
+	
 }
