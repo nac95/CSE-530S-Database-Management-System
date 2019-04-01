@@ -85,6 +85,7 @@ public class HW4Tests {
 			bp.getPage(0, tid2, 50, Permissions.READ_WRITE);
 		} catch (Exception e) {
 			assertTrue(true);
+			return;
 		}
 		fail("Should have thrown an exception");
 
