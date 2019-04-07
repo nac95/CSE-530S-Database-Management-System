@@ -5,9 +5,9 @@ import java.io.*;
 import hw4.BufferPool;
 
 /*
- * Student 1 name:
- * Student 2 name:
- * Date: 
+ * Student 1 name: Na Chen
+ * Student 2 name: Amori Han
+ * Date: Apr-07-2019
  */
 
 /** Database is a class that initializes a static

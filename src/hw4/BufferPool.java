@@ -1,9 +1,12 @@
 package hw4;
 
 import java.io.*;
+import java.util.*;
 
 import hw1.HeapPage;
 import hw1.Tuple;
+import hw1.Catalog.Table;
+import hw1.Database;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -23,8 +26,17 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
     
-    private int numPages;
-
+    private int maxPage;
+    private int tid;
+    private int tableId;
+    private int pid;
+    //for page cache
+    private HashMap<List<Integer>, HeapPage> cache;
+    //record if one page is dirty(modified)
+    private HashMap<List<Integer>,Boolean> dirtyRecord;
+    //what locks currently exist
+    private HashMap<List<Integer>,Permissions> lock;
+    //
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
@@ -32,7 +44,10 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         // your code here
-    	this.numPages = numPages;
+    	this.maxPage = numPages;
+    	this.cache = new HashMap<List<Integer>,HeapPage>();
+    	this.dirtyRecord = new HashMap<List<Integer>,Boolean>();
+    	this.lock = new HashMap<List<Integer>,Permissions>();
     }
 
     /**
@@ -54,7 +69,23 @@ public class BufferPool {
     public HeapPage getPage(int tid, int tableId, int pid, Permissions perm)
         throws Exception {
         // your code here
-        return null;
+    	List<Integer> key = Arrays.asList(tableId,pid);
+    	//if already contained
+    	if(this.cache.containsKey(key)) {
+    		return this.cache.get(key);
+    	}
+    	if(this.cache.size()>=this.maxPage) {
+    		evictPage();
+    	}
+    	// if not contained
+        HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
+        this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
+        
+        // ????have not add lock yet
+        // add lock here
+        
+    	return hp;
+
     }
 
     /**
@@ -69,6 +100,8 @@ public class BufferPool {
      */
     public  void releasePage(int tid, int tableId, int pid) {
         // your code here
+    	List<Integer> key = Arrays.asList(tableId,pid);
+    	
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
@@ -103,6 +136,14 @@ public class BufferPool {
     public  void insertTuple(int tid, int tableId, Tuple t)
         throws Exception {
         // your code here
+    	List<Integer> key = Arrays.asList(tableId,pid);
+    	// check write lock here
+    	// if has write lock
+    	HeapPage hp = this.cache.get(key);
+    	hp.setDirty();
+    	hp.addTuple(t);
+    	//if lock cannot acquired
+    	//block
     }
 
     /**
@@ -119,10 +160,21 @@ public class BufferPool {
     public  void deleteTuple(int tid, int tableId, Tuple t)
         throws Exception {
         // your code here
+    	List<Integer> key = Arrays.asList(tableId,pid);
+    	// check write lock here
+    	// if has write lock
+    	HeapPage hp = this.cache.get(key);
+    	hp.setDirty();
+    	hp.deleteTuple(t);
+    	//if lock cannot acquired
+    	//block
+    	
+    	
     }
 
     private synchronized  void flushPage(int tableId, int pid) throws IOException {
         // your code here
+    	
     }
     
 
@@ -132,6 +184,17 @@ public class BufferPool {
      */
     private synchronized  void evictPage() throws Exception {
         // your code here
+    	int cleanCount = 0;
+    	for(List<Integer> key: this.cache.keySet()) {
+    		HeapPage hp = this.cache.get(key);
+    		if(!hp.isDirty) {
+    			cleanCount++;
+    			this.cache.remove(key);
+    		}
+    	}
+    	if(cleanCount == 0) {
+    		throw new Exception("No clean Page!");
+    	}
     }
 
 }

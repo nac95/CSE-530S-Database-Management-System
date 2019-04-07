@@ -18,7 +18,7 @@ public class HeapPage {
 	private TupleDesc td;
 	private int numSlots;
 	private int tableId;
-
+	public boolean isDirty;
 
 
 	public HeapPage(int id, byte[] data, int tableId) throws IOException {
@@ -48,6 +48,14 @@ public class HeapPage {
 	public int getId() {
 		//your code here
 		return id;
+	}
+	
+	public void setDirty() {
+		this.isDirty = true;
+	}
+	
+	public void setClean() {
+		this.isDirty = false;
 	}
 
 	/**
