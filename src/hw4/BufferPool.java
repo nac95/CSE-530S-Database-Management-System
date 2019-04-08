@@ -109,6 +109,14 @@ public class BufferPool {
     public  void releasePage(int tid, int tableId, int pid) {
         // your code here
     	List<Integer> key = Arrays.asList(tableId,pid);
+    	for(Lock l: this.lockQueue) {
+    		if(l.tid == tid && l.tableId == tableId && l.pid == pid) {
+    			this.lockQueue.remove(l);
+    			// set this page clean
+    			// may not be in this step, may be in commit
+    			this.cache.get(key).setClean();
+    		}
+    	}
     	
     }
 
