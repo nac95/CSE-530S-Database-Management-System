@@ -35,7 +35,9 @@ public class BufferPool {
     //record if one page is dirty(modified)
     private HashMap<List<Integer>,Boolean> dirtyRecord;
     //what locks currently exist
-    private HashMap<List<Integer>,Permissions> lock;
+//    private HashMap<List<Integer>,Permissions> lock;
+    private LinkedList<Lock> lockQueue;
+    
     //
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -47,7 +49,7 @@ public class BufferPool {
     	this.maxPage = numPages;
     	this.cache = new HashMap<List<Integer>,HeapPage>();
     	this.dirtyRecord = new HashMap<List<Integer>,Boolean>();
-    	this.lock = new HashMap<List<Integer>,Permissions>();
+    	this.lockQueue = new LinkedList<Lock>();
     }
 
     /**
@@ -81,8 +83,9 @@ public class BufferPool {
         HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
         this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
         
-        // ????have not add lock yet
         // add lock here
+        Lock lk = new Lock(tid,tableId,pid,perm);
+        lockQueue.add(lk);
         
     	return hp;
 
@@ -107,6 +110,11 @@ public class BufferPool {
     /** Return true if the specified transaction has a lock on the specified page */
     public   boolean holdsLock(int tid, int tableId, int pid) {
         // your code here
+    	for(Lock c: this.lockQueue) {
+    		if(c.pid==pid && c.tableId == tableId && c.tid == c.tid) {
+    			return true;
+    		}
+    	}
         return false;
     }
 
@@ -196,5 +204,30 @@ public class BufferPool {
     		throw new Exception("No clean Page!");
     	}
     }
+    
+    private class Lock{
+    	public int tid;
+    	public int tableId;
+    	public int pid;
+    	private Permissions perm;
+    	private HeapPage hp;
+    	
+    	public Lock(int tid, int tableId, int pid, Permissions perm) {
+    		this.tid = tid;
+    		this.tableId = tableId;
+    		this.pid = pid;
+    		this.perm = perm;
+    		hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
+    	}
+    	
+    	public void setPermissions(Permissions perm) {
+    		this.perm = perm;
+    	}
+    	
+    	public Permissions getPermissions() {
+    		return this.perm;
+    	}
+    }
 
 }
+
