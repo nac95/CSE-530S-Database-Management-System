@@ -77,7 +77,12 @@ public class BufferPool {
     		return this.cache.get(key);
     	}
     	if(this.cache.size()>=this.maxPage) {
-    		evictPage();
+    		try {
+    			evictPage();	
+    		}catch(Exception e) {
+    			//wait till the page is successfully evict
+    		}
+    		
     	}
     	// if not contained
         HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
@@ -143,15 +148,8 @@ public class BufferPool {
      */
     public  void insertTuple(int tid, int tableId, Tuple t)
         throws Exception {
-        // your code here
-    	List<Integer> key = Arrays.asList(tableId,pid);
-    	// check write lock here
-    	// if has write lock
-    	HeapPage hp = this.cache.get(key);
-    	hp.setDirty();
-    	hp.addTuple(t);
-    	//if lock cannot acquired
-    	//block
+    	 // your code here
+
     }
 
     /**
@@ -168,16 +166,7 @@ public class BufferPool {
     public  void deleteTuple(int tid, int tableId, Tuple t)
         throws Exception {
         // your code here
-    	List<Integer> key = Arrays.asList(tableId,pid);
-    	// check write lock here
-    	// if has write lock
-    	HeapPage hp = this.cache.get(key);
-    	hp.setDirty();
-    	hp.deleteTuple(t);
-    	//if lock cannot acquired
-    	//block
-    	
-    	
+   
     }
 
     private synchronized  void flushPage(int tableId, int pid) throws IOException {
@@ -205,6 +194,8 @@ public class BufferPool {
     	}
     }
     
+    
+    //define lock here
     private class Lock{
     	public int tid;
     	public int tableId;
@@ -217,7 +208,7 @@ public class BufferPool {
     		this.tableId = tableId;
     		this.pid = pid;
     		this.perm = perm;
-    		hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
+    		this.hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
     	}
     	
     	public void setPermissions(Permissions perm) {
@@ -228,6 +219,18 @@ public class BufferPool {
     		return this.perm;
     	}
     }
+    
+    //check if the heap page has a write lock
+    //自己写的函数可能会有问题 不知道这个equal到底等不等
+    public boolean ifContainWriteLock(int tid, int tableId) {
+    	for(Lock l:this.lockQueue) {
+    		if(l.tableId==tableId && l.perm.equals(Permissions.READ_WRITE)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
 
 }
 
