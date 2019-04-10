@@ -108,9 +108,11 @@ public class HeapFile {
 				p = readPage(i);
 				for (int s = 0; s < p.getNumSlots(); s++) {
 					if (!p.slotOccupied(s)) {
+						
 						addSuccess = true;
 						p.addTuple(t);
-						writePage(p);
+						//comment this line for project 4
+						//writePage(p);
 						return p;
 					}
 				}
@@ -118,7 +120,8 @@ public class HeapFile {
 			if (!addSuccess) {
 				p = new HeapPage(getNumPages(), new byte[PAGE_SIZE], getId());
 				p.addTuple(t);
-				writePage(p);
+				//comment this line for project 4
+				//writePage(p);
 			}
 			return p;
 		} catch (Exception e) {
@@ -144,6 +147,20 @@ public class HeapFile {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public HeapPage deleteTupleReturn(Tuple t){
+		//your code here
+		HeapPage p = null;
+		try {
+			int pId = t.getPid();
+			p = readPage(pId);
+			p.deleteTuple(t);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return p;
 	}
 	
 	/**

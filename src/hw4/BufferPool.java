@@ -7,6 +7,7 @@ import hw1.HeapPage;
 import hw1.Tuple;
 import hw1.Catalog.Table;
 import hw1.Database;
+import hw1.HeapFile;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -27,16 +28,18 @@ public class BufferPool {
     public static final int DEFAULT_PAGES = 50;
     
     private int maxPage;
-    private int tid;
-    private int tableId;
-    private int pid;
     //for page cache
-    private HashMap<List<Integer>, HeapPage> cache;
+    //private HashMap<List<Integer>, HeapPage> cache;
+    private Map<HeapPage, TableAndPage> cache;
     //record if one page is dirty(modified)
-    private HashMap<List<Integer>,Boolean> dirtyRecord;
+    //private HashMap<List<Integer>, Boolean> dirtyRecord;
+    private Map<TableAndPage, Boolean> dirtyRecord;
     //what locks currently exist
 //    private HashMap<List<Integer>,Permissions> lock;
     private LinkedList<Lock> lockQueue;
+    
+    //help to find each transaction contains which page in which table(key is tid)
+    private Map<Integer, List<TableAndPage>> tran;
     
     //
     /**
@@ -46,10 +49,14 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         // your code here
-    	this.maxPage = numPages;
-    	this.cache = new HashMap<List<Integer>,HeapPage>();
-    	this.dirtyRecord = new HashMap<List<Integer>,Boolean>();
-    	this.lockQueue = new LinkedList<Lock>();
+    	maxPage = numPages;
+    	//this.cache = new HashMap<List<Integer>,HeapPage>();
+    	cache = new HashMap<>();
+    	//this.dirtyRecord = new HashMap<List<Integer>,Boolean>();
+    	dirtyRecord = new HashMap<>();
+    	lockQueue = new LinkedList<Lock>();
+    	
+    	tran = new HashMap<>();
     }
 
     /**
@@ -71,26 +78,99 @@ public class BufferPool {
     public HeapPage getPage(int tid, int tableId, int pid, Permissions perm)
         throws Exception {
         // your code here
-    	List<Integer> key = Arrays.asList(tableId,pid);
+    	//List<Integer> key = Arrays.asList(tableId, pid);
+    	TableAndPage single = new TableAndPage(tableId, pid);
     	//if already contained
-    	if(this.cache.containsKey(key)) {
+    	/*if(this.cache.containsKey(key)) {
     		return this.cache.get(key);
     	}
-    	if(this.cache.size()>=this.maxPage) {
+    	if(this.cache.size() >= this.maxPage) {
     		try {
     			evictPage();	
     		}catch(Exception e) {
     			//wait till the page is successfully evict
     		}
     		
+    	}*/
+    	/*for (TableAndPage each : cache.keySet()) {
+    		if (each.pid == single.pid && each.tableId == single.tableId && each.tid == single.tid) {
+    			return cache.get(single);
+    		}
+    	}*/
+    	if (cache.size() >= maxPage) {
+    		try {
+    			evictPage();	
+    		}catch(Exception e) {
+    			//wait till the page is successfully evict
+    		}
     	}
     	// if not contained
         HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
-        this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
+       //this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
+        if (lockQueue.size() == 0) {
+        	cache.put(hp, single);
+        	List<TableAndPage> list = new ArrayList<>();
+        	list.add(single);
+	        tran.put(tid, list);
+	        Lock lock = new Lock(tid, tableId, pid, perm);
+        	lockQueue.add(lock);
+        } else {
+        	//check whether i can add lock or not
+            for (Lock lock : lockQueue) {
+        		if (lock.pid == single.pid && lock.tableId == single.tableId) {
+        			//if the page has already has a write lock, block
+                	//if the page has already has a read lock, and new perm is also read, no problem;
+                	
+        			if (lock.perm == Permissions.READ_ONLY) {
+                		if (perm == Permissions.READ_ONLY) {
+                			//allow
+                			cache.put(hp, single);
+                			List<TableAndPage> list = tran.get(tid);
+                			if (list == null) {
+                        		list = new ArrayList<>();
+                        		list.add(single);
+                        		Lock l = new Lock(tid, tableId, pid, perm);
+                        		lockQueue.add(l);
+                        	} else if (!list.contains(single)) {
+                        		list.add(single);
+                        	}
+                	        tran.put(tid, list);
+                	        break;
+                		} else {
+                			//TODO: should abort one after waiting for sometime
+                			//new permission is read_write
+                			if (lock.tid != tid) {
+                				//abort the new one
+                				transactionComplete(tid, false);
+                			}
+                		}
+                	} else {
+                		//if original permission is read_write, abort everything
+                		if (lock.tid != tid) {
+                			transactionComplete(tid, false);
+                		}
+                		
+                	}
+        		} else {
+        			cache.put(hp, single);
+                	List<TableAndPage> list = tran.get(tid);
+                	if (list == null) {
+                		list = new ArrayList<>();
+                	}
+                	list.add(single);
+        	        tran.put(tid, list);
+        	        Lock l = new Lock(tid, tableId, pid, perm);
+            		lockQueue.add(l);
+            		break;
+                }
+        		
+        	}
+        }
         
         // add lock here
-        Lock lk = new Lock(tid,tableId,pid,perm);
-        lockQueue.add(lk);
+        //might need to check whether can acquire or block
+       /* Lock lk = new Lock(tid,tableId,pid,perm);
+        lockQueue.add(lk);*/
         
     	return hp;
 
@@ -106,25 +186,25 @@ public class BufferPool {
      * @param tableID the ID of the table containing the page to unlock
      * @param pid the ID of the page to unlock
      */
-    public  void releasePage(int tid, int tableId, int pid) {
+    public void releasePage(int tid, int tableId, int pid) {
         // your code here
-    	List<Integer> key = Arrays.asList(tableId,pid);
-    	for(Lock l: this.lockQueue) {
+    	/*List<Integer> key = Arrays.asList(tableId,pid);*/
+    	for(Lock l: lockQueue) {
     		if(l.tid == tid && l.tableId == tableId && l.pid == pid) {
-    			this.lockQueue.remove(l);
+    			lockQueue.remove(l);
     			// set this page clean
     			// may not be in this step, may be in commit
-    			this.cache.get(key).setClean();
+    			//this.cache.get(key).setClean();
     		}
     	}
     	
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
-    public   boolean holdsLock(int tid, int tableId, int pid) {
+    public boolean holdsLock(int tid, int tableId, int pid) {
         // your code here
-    	for(Lock c: this.lockQueue) {
-    		if(c.pid==pid && c.tableId == tableId && c.tid == c.tid) {
+    	for(Lock c: lockQueue) {
+    		if(c.pid==pid && c.tableId == tableId && c.tid == tid) {
     			return true;
     		}
     	}
@@ -138,9 +218,19 @@ public class BufferPool {
      * @param tid the ID of the transaction requesting the unlock
      * @param commit a flag indicating whether we should commit or abort
      */
-    public   void transactionComplete(int tid, boolean commit)
+    public void transactionComplete(int tid, boolean commit)
         throws IOException {
         // your code here
+    	//release all locks associated to the transaction no matter commit or abort
+		List<TableAndPage> tableAndPages = tran.get(tid);
+		for (TableAndPage each : tableAndPages) {
+			int tableId = each.tableId;
+			int pid = each.pid;
+			releasePage(tid, tableId, pid);
+			if (commit) {
+				flushPage(tableId, pid);
+			}
+		}
     }
 
     /**
@@ -154,10 +244,36 @@ public class BufferPool {
      * @param tableId the table to add the tuple to
      * @param t the tuple to add
      */
-    public  void insertTuple(int tid, int tableId, Tuple t)
+    public void insertTuple(int tid, int tableId, Tuple t)
         throws Exception {
     	 // your code here
-
+    	HeapFile hf = Database.getCatalog().getDbFile(tableId);
+    	HeapPage hp = hf.addTuple(t);
+    	int pid = hp.getId();
+    	TableAndPage single = new TableAndPage(tableId, pid);
+    	if (cache.containsKey(hp)) {
+    		//TODO
+    		for (Lock lock : lockQueue) {
+    			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
+    				if (lock.perm == Permissions.READ_WRITE) {
+    					
+    				}
+    			}
+    		}
+    	} else {
+    		cache.put(hp, single);
+    		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+    		List<TableAndPage> list = tran.get(tid);
+			if (list == null) {
+        		list = new ArrayList<>();
+        	}
+        	list.add(single);
+        	lockQueue.add(writeLock);
+	        tran.put(tid, list);
+	        dirtyRecord.put(single, true);
+	        hp.setDirty();
+    	}
+    	
     }
 
     /**
@@ -171,15 +287,41 @@ public class BufferPool {
      * @param tableId the ID of the table that contains the tuple to be deleted
      * @param t the tuple to add
      */
-    public  void deleteTuple(int tid, int tableId, Tuple t)
+    public void deleteTuple(int tid, int tableId, Tuple t)
         throws Exception {
         // your code here
-   
+    	HeapFile hf = Database.getCatalog().getDbFile(tableId);
+    	HeapPage hp = hf.deleteTupleReturn(t);
+    	int pid = hp.getId();
+    	TableAndPage single = new TableAndPage(tableId, pid);
+    	
+    	if (cache.containsKey(hp)) {
+    		//TODO
+    	
+    	} else {
+    		cache.put(hp, single);
+    		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+    		List<TableAndPage> list = tran.get(tid);
+			if (list == null) {
+        		list = new ArrayList<>();
+        	}
+        	list.add(single);
+        	lockQueue.add(writeLock);
+	        tran.put(tid, list);
+	        dirtyRecord.put(single, true);
+	        hp.setDirty();
+    	}
     }
 
-    private synchronized  void flushPage(int tableId, int pid) throws IOException {
+    private synchronized void flushPage(int tableId, int pid) throws IOException {
         // your code here
-    	
+    	HeapFile hf = Database.getCatalog().getDbFile(tableId);
+    	for (HeapPage hp : cache.keySet()) {
+    		TableAndPage single = cache.get(hp);
+    		if (single.tableId == tableId && single.pid == pid) {
+    			hf.writePage(hp);
+    		}
+    	}
     }
     
 
@@ -190,13 +332,13 @@ public class BufferPool {
     private synchronized  void evictPage() throws Exception {
         // your code here
     	int cleanCount = 0;
-    	for(List<Integer> key: this.cache.keySet()) {
-    		HeapPage hp = this.cache.get(key);
+    	for (HeapPage hp : cache.keySet()){
     		if(!hp.isDirty) {
     			cleanCount++;
-    			this.cache.remove(key);
+    			cache.remove(hp);
     		}
     	}
+    	
     	if(cleanCount == 0) {
     		throw new Exception("No clean Page!");
     	}
@@ -237,8 +379,16 @@ public class BufferPool {
     		}
     	}
     	return false;
-    }
-    
+    }  
 
+}
+class TableAndPage {
+	int pid;
+	int tableId;
+	
+	public TableAndPage(int tableId, int pid) {
+		this.tableId = tableId;
+		this.pid = pid;
+	}
 }
 
