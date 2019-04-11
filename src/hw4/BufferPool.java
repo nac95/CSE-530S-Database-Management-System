@@ -73,23 +73,22 @@ public class BufferPool {
         throws Exception {
         // your code here
     	TableAndPage single = new TableAndPage(tableId, pid);
-    	//if already contained
-//    	if(this.cache.containsKey(key)) {
-//    		return this.cache.get(key);
-//    	}
+    	
     	HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
     	if (cache.size() >= maxPage) {
     		System.out.println("!!!!!!!!!!detect exceed amx page");
-    		try {
+    		evictPage();
+    		/*try {
     			evictPage();	
     		}catch(Exception e) {
     			//wait till the page is successfully evict
-    		}
+    		}*/
     	} else {
     		// if not contained
-            
-           //this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
             if (lockQueue.size() == 0) {
+            	/*if (perm == Permissions.READ_WRITE) {
+            		hp.setDirty();
+            	}*/
             	cache.put(hp, single);
             	List<TableAndPage> list = new ArrayList<>();
             	list.add(single);
@@ -121,7 +120,6 @@ public class BufferPool {
                     	        update = true;
                     	        break;
                     		} else {
-                    			//TODO: should abort one after waiting for sometime
                     			//new permission is read_write
                     			if (lock.tid != tid) {
                     				//abort the new one
@@ -141,6 +139,9 @@ public class BufferPool {
             		
             	}
                 if (!update) {
+                	/*if (perm == Permissions.READ_WRITE) {
+                		hp.setDirty();
+                	}*/
                 	cache.put(hp, single);
                     List<TableAndPage> list = tran.get(tid);
                     if (list == null) {
@@ -154,13 +155,6 @@ public class BufferPool {
                 
             }
     	}
-    	
-        
-        // add lock here
-        //might need to check whether can acquire or block
-       /* Lock lk = new Lock(tid,tableId,pid,perm);
-        lockQueue.add(lk);*/
-        
     	return hp;
 
     }
@@ -177,13 +171,10 @@ public class BufferPool {
      */
     public void releasePage(int tid, int tableId, int pid) {
         // your code here
-    	/*List<Integer> key = Arrays.asList(tableId,pid);*/
     	for(Lock l: lockQueue) {
     		if(l.tid == tid && l.tableId == tableId && l.pid == pid) {
     			lockQueue.remove(l);
     			// set this page clean
-    			// may not be in this step, may be in commit
-    			//this.cache.get(key).setClean();
     		}
     	}
     	
@@ -251,14 +242,11 @@ public class BufferPool {
         					lockQueue.remove(lock);
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
-        					
-        					//cache.remove(hp, single);
         					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
         				} else {
-        					//cache.remove(hp, single);
         					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
@@ -325,14 +313,11 @@ public class BufferPool {
         					lockQueue.remove(lock);
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
-        					//not successufully remove
-        					//cache.remove(hp, single);
         					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
         				} else {
-        					//cache.remove(hp, single);
         					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
@@ -383,6 +368,7 @@ public class BufferPool {
     			System.out.println("!!!!!detect clean page" + hp.getId());
     			cleanCount++;
     			cache.remove(hp);
+    			break;
     		}
     	}
     	
@@ -417,17 +403,6 @@ public class BufferPool {
     		return this.perm;
     	}
     }
-    
-    //check if the heap page has a write lock
-    //自己写的函数可能会有问题 不知道这个equal到底等不等
-    public boolean ifContainWriteLock(int tid, int tableId) {
-    	for(Lock l:this.lockQueue) {
-    		if(l.tableId==tableId && l.perm.equals(Permissions.READ_WRITE)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }  
 
 }
 class TableAndPage {
