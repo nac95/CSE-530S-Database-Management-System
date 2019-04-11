@@ -29,19 +29,14 @@ public class BufferPool {
     
     private int maxPage;
     //for page cache
-    //private HashMap<List<Integer>, HeapPage> cache;
     private Map<HeapPage, TableAndPage> cache;
     //record if one page is dirty(modified)
-    //private HashMap<List<Integer>, Boolean> dirtyRecord;
     private Map<TableAndPage, Boolean> dirtyRecord;
     //what locks currently exist
-//    private HashMap<List<Integer>,Permissions> lock;
     private LinkedList<Lock> lockQueue;
-    
     //help to find each transaction contains which page in which table(key is tid)
     private Map<Integer, List<TableAndPage>> tran;
     
-    //
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
@@ -50,12 +45,9 @@ public class BufferPool {
     public BufferPool(int numPages) {
         // your code here
     	maxPage = numPages;
-    	//this.cache = new HashMap<List<Integer>,HeapPage>();
     	cache = new HashMap<>();
-    	//this.dirtyRecord = new HashMap<List<Integer>,Boolean>();
     	dirtyRecord = new HashMap<>();
     	lockQueue = new LinkedList<Lock>();
-    	
     	tran = new HashMap<>();
     }
 
@@ -78,25 +70,12 @@ public class BufferPool {
     public HeapPage getPage(int tid, int tableId, int pid, Permissions perm)
         throws Exception {
         // your code here
-    	//List<Integer> key = Arrays.asList(tableId, pid);
     	TableAndPage single = new TableAndPage(tableId, pid);
     	//if already contained
-    	/*if(this.cache.containsKey(key)) {
-    		return this.cache.get(key);
-    	}
-    	if(this.cache.size() >= this.maxPage) {
-    		try {
-    			evictPage();	
-    		}catch(Exception e) {
-    			//wait till the page is successfully evict
-    		}
-    		
-    	}*/
-    	/*for (TableAndPage each : cache.keySet()) {
-    		if (each.pid == single.pid && each.tableId == single.tableId && each.tid == single.tid) {
-    			return cache.get(single);
-    		}
-    	}*/
+//    	if(this.cache.containsKey(key)) {
+//    		return this.cache.get(key);
+//    	}
+    	
     	if (cache.size() >= maxPage) {
     		try {
     			evictPage();	
@@ -115,6 +94,7 @@ public class BufferPool {
 	        Lock lock = new Lock(tid, tableId, pid, perm);
         	lockQueue.add(lock);
         } else {
+        	boolean update = false;
         	//check whether i can add lock or not
             for (Lock lock : lockQueue) {
         		if (lock.pid == single.pid && lock.tableId == single.tableId) {
@@ -135,6 +115,7 @@ public class BufferPool {
                         		list.add(single);
                         	}
                 	        tran.put(tid, list);
+                	        update = true;
                 	        break;
                 		} else {
                 			//TODO: should abort one after waiting for sometime
@@ -151,20 +132,21 @@ public class BufferPool {
                 		}
                 		
                 	}
-        		} else {
-        			cache.put(hp, single);
-                	List<TableAndPage> list = tran.get(tid);
-                	if (list == null) {
-                		list = new ArrayList<>();
-                	}
-                	list.add(single);
-        	        tran.put(tid, list);
-        	        Lock l = new Lock(tid, tableId, pid, perm);
-            		lockQueue.add(l);
-            		break;
-                }
+        		} 
         		
         	}
+            if (!update) {
+            	cache.put(hp, single);
+                List<TableAndPage> list = tran.get(tid);
+                if (list == null) {
+                	list = new ArrayList<>();
+                }
+                list.add(single);
+                tran.put(tid, list);
+                Lock l = new Lock(tid, tableId, pid, perm);
+                lockQueue.add(l);
+            }
+            
         }
         
         // add lock here
