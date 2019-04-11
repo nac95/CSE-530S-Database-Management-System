@@ -123,12 +123,14 @@ public class BufferPool {
                 			if (lock.tid != tid) {
                 				//abort the new one
                 				transactionComplete(tid, false);
+                				update = true;
                 			}
                 		}
                 	} else {
                 		//if original permission is read_write, abort everything
                 		if (lock.tid != tid) {
                 			transactionComplete(tid, false);
+                			update = true;
                 		}
                 		
                 	}
@@ -233,16 +235,21 @@ public class BufferPool {
     	HeapPage hp = hf.addTuple(t);
     	int pid = hp.getId();
     	TableAndPage single = new TableAndPage(tableId, pid);
-    	if (cache.containsKey(hp)) {
-    		//TODO
-    		for (Lock lock : lockQueue) {
-    			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
-    				if (lock.perm == Permissions.READ_WRITE) {
-    					
-    				}
-    			}
-    		}
-    	} else {
+    	boolean update = false;
+    	for (TableAndPage each : cache.values()) {
+    		if (each.tableId == tableId && each.pid == pid) {
+        		//TODO
+        		for (Lock lock : lockQueue) {
+        			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
+        				if (lock.perm == Permissions.READ_WRITE) {
+        					
+        				}
+        			}
+        		}
+        		update = true;
+        	} 
+    	}
+    	if (!update) {
     		cache.put(hp, single);
     		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
     		List<TableAndPage> list = tran.get(tid);
