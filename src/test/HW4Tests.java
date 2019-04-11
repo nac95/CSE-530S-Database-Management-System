@@ -80,6 +80,7 @@ public class HW4Tests {
 			s[1] = 98;
 			s[2] = 121;
 			t.setPid(i);
+			
 			bp.deleteTuple(0, tid2, t);
 		}
 		try {

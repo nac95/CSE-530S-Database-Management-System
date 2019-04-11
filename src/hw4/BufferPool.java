@@ -251,14 +251,15 @@ public class BufferPool {
         					lockQueue.remove(lock);
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
-        					cache.remove(hp, single);
-        					//cache.remove(hp);
+        					
+        					//cache.remove(hp, single);
+        					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
         				} else {
-        					cache.remove(hp, single);
-        					//cache.remove(hp);
+        					//cache.remove(hp, single);
+        					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
@@ -325,14 +326,14 @@ public class BufferPool {
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
         					//not successufully remove
-        					cache.remove(hp, single);
-        					//cache.remove(hp);
+        					//cache.remove(hp, single);
+        					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
         				} else {
-        					cache.remove(hp, single);
-        					//cache.remove(hp);
+        					//cache.remove(hp, single);
+        					cache.remove(hp);
         					hp.setDirty();
         					cache.put(hp, single);
         					break;
