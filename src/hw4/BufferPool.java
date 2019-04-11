@@ -2,6 +2,7 @@ package hw4;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import hw1.HeapPage;
 import hw1.Tuple;
@@ -29,6 +30,7 @@ public class BufferPool {
     
     private int maxPage;
     //for page cache
+    //private ConcurrentHashMap<HeapPage, TableAndPage> cache;
     private Map<HeapPage, TableAndPage> cache;
     //record if one page is dirty(modified)
     private Map<TableAndPage, Boolean> dirtyRecord;
@@ -77,6 +79,7 @@ public class BufferPool {
 //    	}
     	HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
     	if (cache.size() >= maxPage) {
+    		System.out.println("!!!!!!!!!!detect exceed amx page");
     		try {
     			evictPage();	
     		}catch(Exception e) {
@@ -238,7 +241,8 @@ public class BufferPool {
     	int pid = hp.getId();
     	TableAndPage single = new TableAndPage(tableId, pid);
     	boolean update = false;
-    	for (TableAndPage each : cache.values()) {
+    	Map<HeapPage, TableAndPage> copyCache = copyCache(cache);
+    	for (TableAndPage each : copyCache.values()) {
     		if (each.tableId == tableId && each.pid == pid) {
         		//TODO
         		for (Lock lock : lockQueue) {
@@ -278,6 +282,15 @@ public class BufferPool {
     	}
     	
     }
+    
+    private Map<HeapPage, TableAndPage> copyCache(Map<HeapPage, TableAndPage> cache) {
+    	Map<HeapPage, TableAndPage> copyCache = new HashMap<>();
+    	for (HeapPage hp : cache.keySet()) {
+    		copyCache.put(hp, cache.get(hp));
+    	}
+    	return copyCache;
+    	
+    }
 
     /**
      * Remove the specified tuple from the buffer pool.
@@ -299,7 +312,8 @@ public class BufferPool {
     	TableAndPage single = new TableAndPage(tableId, pid);
     	
     	boolean update = false;
-    	for (TableAndPage each : cache.values()) {
+    	Map<HeapPage, TableAndPage> copyCache = copyCache(cache);
+    	for (TableAndPage each : copyCache.values()) {
     		if (each.tableId == tableId && each.pid == pid) {
     			//TODO
         		for (Lock lock : lockQueue) {
@@ -358,14 +372,16 @@ public class BufferPool {
     private synchronized  void evictPage() throws Exception {
         // your code here
     	int cleanCount = 0;
-    	for (HeapPage hp : cache.keySet()){
+    	for (HeapPage hp : cache.keySet()) {
     		if(!hp.isDirty) {
+    			System.out.println("!!!!!detect clean page" + hp.getId());
     			cleanCount++;
     			cache.remove(hp);
     		}
     	}
     	
     	if(cleanCount == 0) {
+    		System.out.println("!!!!!!no clean page");
     		throw new Exception("No clean Page!");
     	}
     }

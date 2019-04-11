@@ -70,6 +70,7 @@ public class HW4Tests {
 	
 	@Test
 	public void testEvict() throws Exception {
+		
 		for(int i = 0; i < 50; i++) {
 			bp.getPage(0, tid2, i, Permissions.READ_WRITE);
 			Tuple t = new Tuple(td);
@@ -87,6 +88,7 @@ public class HW4Tests {
 			assertTrue(true);
 			return;
 		}
+		System.out.println("!!!!!!evict test finish");
 		fail("Should have thrown an exception");
 
 	}
