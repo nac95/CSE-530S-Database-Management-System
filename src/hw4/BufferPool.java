@@ -233,30 +233,29 @@ public class BufferPool {
     	TableAndPage single = new TableAndPage(tableId, pid);
     	boolean update = false;
     	Map<HeapPage, TableAndPage> copyCache = copyCache(cache);
-    	for (TableAndPage each : copyCache.values()) {
-    		if (each.tableId == tableId && each.pid == pid) {
+    	
+    	if (copyCache.containsKey(hp)) {
         		//TODO
-        		for (Lock lock : lockQueue) {
-        			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
-        				if (lock.perm != Permissions.READ_WRITE) {
-        					lockQueue.remove(lock);
-        					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
-        					lockQueue.add(newLock);
-        					cache.remove(hp);
-        					hp.setDirty();
-        					cache.put(hp, single);
-        					break;
-        				} else {
-        					cache.remove(hp);
-        					hp.setDirty();
-        					cache.put(hp, single);
-        					break;
-        				}
-        			}
-        		}
-        		update = true;
-        	} 
-    	}
+    		for (Lock lock : lockQueue) {
+    			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
+    				if (lock.perm != Permissions.READ_WRITE) {
+    					lockQueue.remove(lock);
+    					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+    					lockQueue.add(newLock);
+    					cache.remove(hp);
+    					hp.setDirty();
+    					cache.put(hp, single);
+    					break;
+    				} else {
+    					cache.remove(hp);
+    					hp.setDirty();
+    					cache.put(hp, single);
+    					break;
+    				}
+    			}
+    		}
+    		update = true;
+    	} 
     	if (!update) {
     		hp.setDirty();
     		cache.put(hp, single);
@@ -304,30 +303,28 @@ public class BufferPool {
     	
     	boolean update = false;
     	Map<HeapPage, TableAndPage> copyCache = copyCache(cache);
-    	for (TableAndPage each : copyCache.values()) {
-    		if (each.tableId == tableId && each.pid == pid) {
-    			//TODO
-        		for (Lock lock : lockQueue) {
-        			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
-        				if (lock.perm != Permissions.READ_WRITE) {
-        					lockQueue.remove(lock);
-        					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
-        					lockQueue.add(newLock);
-        					cache.remove(hp);
-        					hp.setDirty();
-        					cache.put(hp, single);
-        					break;
-        				} else {
-        					cache.remove(hp);
-        					hp.setDirty();
-        					cache.put(hp, single);
-        					break;
-        				}
-        			}
-        		}
-        		update = true;
-        	} 
-    	}
+    	if (copyCache.containsKey(hp)) {
+    		//TODO
+    		for (Lock lock : lockQueue) {
+    			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
+    				if (lock.perm != Permissions.READ_WRITE) {
+    					lockQueue.remove(lock);
+    					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+    					lockQueue.add(newLock);
+    					cache.remove(hp);
+    					hp.setDirty();
+    					cache.put(hp, single);
+    					break;
+    				} else {
+    					cache.remove(hp);
+    					hp.setDirty();
+    					cache.put(hp, single);
+    					break;
+    				}
+    			}
+    		}
+    		update = true;
+    	} 
     	if (!update) {
     		hp.setDirty();
     		cache.put(hp, single);
