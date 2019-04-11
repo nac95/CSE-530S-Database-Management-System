@@ -75,81 +75,83 @@ public class BufferPool {
 //    	if(this.cache.containsKey(key)) {
 //    		return this.cache.get(key);
 //    	}
-    	
+    	HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
     	if (cache.size() >= maxPage) {
     		try {
     			evictPage();	
     		}catch(Exception e) {
     			//wait till the page is successfully evict
     		}
-    	}
-    	// if not contained
-        HeapPage hp = Database.getCatalog().getDbFile(tableId).readPage(pid);
-       //this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
-        if (lockQueue.size() == 0) {
-        	cache.put(hp, single);
-        	List<TableAndPage> list = new ArrayList<>();
-        	list.add(single);
-	        tran.put(tid, list);
-	        Lock lock = new Lock(tid, tableId, pid, perm);
-        	lockQueue.add(lock);
-        } else {
-        	boolean update = false;
-        	//check whether i can add lock or not
-            for (Lock lock : lockQueue) {
-        		if (lock.pid == single.pid && lock.tableId == single.tableId) {
-        			//if the page has already has a write lock, block
-                	//if the page has already has a read lock, and new perm is also read, no problem;
-                	
-        			if (lock.perm == Permissions.READ_ONLY) {
-                		if (perm == Permissions.READ_ONLY) {
-                			//allow
-                			cache.put(hp, single);
-                			List<TableAndPage> list = tran.get(tid);
-                			if (list == null) {
-                        		list = new ArrayList<>();
-                        		list.add(single);
-                        		Lock l = new Lock(tid, tableId, pid, perm);
-                        		lockQueue.add(l);
-                        	} else if (!list.contains(single)) {
-                        		list.add(single);
-                        	}
-                	        tran.put(tid, list);
-                	        update = true;
-                	        break;
-                		} else {
-                			//TODO: should abort one after waiting for sometime
-                			//new permission is read_write
-                			if (lock.tid != tid) {
-                				//abort the new one
-                				transactionComplete(tid, false);
-                				update = true;
-                			}
-                		}
-                	} else {
-                		//if original permission is read_write, abort everything
-                		if (lock.tid != tid) {
-                			transactionComplete(tid, false);
-                			update = true;
-                		}
-                		
-                	}
-        		} 
-        		
-        	}
-            if (!update) {
-            	cache.put(hp, single);
-                List<TableAndPage> list = tran.get(tid);
-                if (list == null) {
-                	list = new ArrayList<>();
-                }
-                list.add(single);
-                tran.put(tid, list);
-                Lock l = new Lock(tid, tableId, pid, perm);
-                lockQueue.add(l);
-            }
+    	} else {
+    		// if not contained
             
-        }
+           //this.cache.put(Collections.unmodifiableList(Arrays.asList(tableId, pid)), hp);
+            if (lockQueue.size() == 0) {
+            	cache.put(hp, single);
+            	List<TableAndPage> list = new ArrayList<>();
+            	list.add(single);
+    	        tran.put(tid, list);
+    	        Lock lock = new Lock(tid, tableId, pid, perm);
+            	lockQueue.add(lock);
+            } else {
+            	boolean update = false;
+            	//check whether i can add lock or not
+                for (Lock lock : lockQueue) {
+            		if (lock.pid == single.pid && lock.tableId == single.tableId) {
+            			//if the page has already has a write lock, block
+                    	//if the page has already has a read lock, and new perm is also read, no problem;
+                    	
+            			if (lock.perm == Permissions.READ_ONLY) {
+                    		if (perm == Permissions.READ_ONLY) {
+                    			//allow
+                    			cache.put(hp, single);
+                    			List<TableAndPage> list = tran.get(tid);
+                    			if (list == null) {
+                            		list = new ArrayList<>();
+                            		list.add(single);
+                            		Lock l = new Lock(tid, tableId, pid, perm);
+                            		lockQueue.add(l);
+                            	} else if (!list.contains(single)) {
+                            		list.add(single);
+                            	}
+                    	        tran.put(tid, list);
+                    	        update = true;
+                    	        break;
+                    		} else {
+                    			//TODO: should abort one after waiting for sometime
+                    			//new permission is read_write
+                    			if (lock.tid != tid) {
+                    				//abort the new one
+                    				transactionComplete(tid, false);
+                    				update = true;
+                    			}
+                    		}
+                    	} else {
+                    		//if original permission is read_write, abort everything
+                    		if (lock.tid != tid) {
+                    			transactionComplete(tid, false);
+                    			update = true;
+                    		}
+                    		
+                    	}
+            		} 
+            		
+            	}
+                if (!update) {
+                	cache.put(hp, single);
+                    List<TableAndPage> list = tran.get(tid);
+                    if (list == null) {
+                    	list = new ArrayList<>();
+                    }
+                    list.add(single);
+                    tran.put(tid, list);
+                    Lock l = new Lock(tid, tableId, pid, perm);
+                    lockQueue.add(l);
+                }
+                
+            }
+    	}
+    	
         
         // add lock here
         //might need to check whether can acquire or block
@@ -241,8 +243,10 @@ public class BufferPool {
         		//TODO
         		for (Lock lock : lockQueue) {
         			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
-        				if (lock.perm == Permissions.READ_WRITE) {
-        					
+        				if (lock.perm != Permissions.READ_WRITE) {
+        					lockQueue.remove(lock);
+        					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+        					lockQueue.add(newLock);
         				}
         			}
         		}
@@ -284,10 +288,23 @@ public class BufferPool {
     	int pid = hp.getId();
     	TableAndPage single = new TableAndPage(tableId, pid);
     	
-    	if (cache.containsKey(hp)) {
-    		//TODO
-    	
-    	} else {
+    	boolean update = false;
+    	for (TableAndPage each : cache.values()) {
+    		if (each.tableId == tableId && each.pid == pid) {
+    			//TODO
+        		for (Lock lock : lockQueue) {
+        			if (lock.tableId == tableId && lock.tid == tid && lock.pid == pid) {
+        				if (lock.perm != Permissions.READ_WRITE) {
+        					lockQueue.remove(lock);
+        					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
+        					lockQueue.add(newLock);
+        				}
+        			}
+        		}
+        		update = true;
+        	} 
+    	}
+    	if (!update) {
     		cache.put(hp, single);
     		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
     		List<TableAndPage> list = tran.get(tid);
