@@ -247,6 +247,15 @@ public class BufferPool {
         					lockQueue.remove(lock);
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
+        					cache.remove(hp);
+        					hp.setDirty();
+        					cache.put(hp, single);
+        					break;
+        				} else {
+        					cache.remove(hp);
+        					hp.setDirty();
+        					cache.put(hp, single);
+        					break;
         				}
         			}
         		}
@@ -254,6 +263,7 @@ public class BufferPool {
         	} 
     	}
     	if (!update) {
+    		hp.setDirty();
     		cache.put(hp, single);
     		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
     		List<TableAndPage> list = tran.get(tid);
@@ -298,6 +308,15 @@ public class BufferPool {
         					lockQueue.remove(lock);
         					Lock newLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
         					lockQueue.add(newLock);
+        					cache.remove(hp);
+        					hp.setDirty();
+        					cache.put(hp, single);
+        					break;
+        				} else {
+        					cache.remove(hp);
+        					hp.setDirty();
+        					cache.put(hp, single);
+        					break;
         				}
         			}
         		}
@@ -305,6 +324,7 @@ public class BufferPool {
         	} 
     	}
     	if (!update) {
+    		hp.setDirty();
     		cache.put(hp, single);
     		Lock writeLock = new Lock(tid, tableId, pid, Permissions.READ_WRITE);
     		List<TableAndPage> list = tran.get(tid);
